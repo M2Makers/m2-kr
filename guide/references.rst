@@ -1,6 +1,6 @@
 .. _references:
 
-Appendix B: 레퍼런스
+Appendix C: 레퍼런스
 ***********************
 
 Headless/Decoupled CMS
