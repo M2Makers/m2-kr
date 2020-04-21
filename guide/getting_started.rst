@@ -42,13 +42,27 @@ M2는 리눅스 서비스로 동작한다.
       service ston status
 
 
-.. _getting-started-serverconf:
+.. _getting-started-sysconf:
 
-서버 구성
+시스템 구성
 ====================================
 
-- 최소 - 4코어 / 16GB
-- 권장 - 4코어 / 32GB
+================= =================== ===========================
+항목               권장                최소
+================= =================== ===========================
+OS                 Cent 7.6 이상       Cent 7.4 이상
+CPU                8                   4
+Memory             32                  16
+Disk               100GB               100GB
+NIC                1GbE 이상           1GbE 이상
+================= =================== ===========================
+
+
+.. note::
+
+   100GB 디스크는 로그 저장용이다. 
+   콘텐츠 캐싱이 필요한 경우 `캐싱 디스크 <https://ston.readthedocs.io/ko/latest/admin/environment.html#storage>`_ 를 별도로 구성한다.
+
 
 
 .. _getting-started-os:
@@ -84,9 +98,6 @@ Cent OS 7.4이상만 지원한다.
 
 설치과정은 install.log에 기록된다. 로그를 통해 설치 중 발생하는 문제를 알 수 있다.
 
-.. note:
-
-   설치 스크립트에서 볼 수 있듯 `STON Edge Server <https://ston.readthedocs.io/ko/latest/>`_ 를 먼저 설치한다.
 
 
 
@@ -102,6 +113,7 @@ Cent OS 7.4이상만 지원한다.
 * 확인절차 후 발급
 
 라이선스 파일(license.xml)이 반드시 ``/usr/local/ston/`` 에 존재해야 정상적으로 구동된다.
+
 
 
 .. _getting-started-update:
