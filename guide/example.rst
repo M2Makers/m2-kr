@@ -57,6 +57,7 @@ Appendix C: 예제
       </View>
       <Control>
          <Path ModelParam="model" ViewParam="view" Post="off" Get="on">/banner</Path>
+         <Module Name="aws_s3-backup">bucket:mybucket; object:/my/desired/key.txt;</Module>
       </Control>
    </Endpoint>
 
