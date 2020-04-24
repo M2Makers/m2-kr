@@ -1,4 +1,4 @@
-.. _mvc:
+.. _endpoint:
 
 4장. Endpoint
 ******************
@@ -11,7 +11,7 @@
     :align: center
 
 
-.. _mvc-ston-conf:
+.. _endpoint-ston-conf:
 
 가상호스트 설정
 ====================================
