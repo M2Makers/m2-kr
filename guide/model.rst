@@ -24,7 +24,11 @@
 M2-JSON 구조
 ====================================
 
-엔드포인트를 ``/fruits`` 로 설정했으므로 클라이언트는 다음과 같이 호출한다. ::
+.. figure:: img/m2_23.png
+    :align: center
+    
+
+예를 들어 엔드포인트를 ``/fruits`` 로 설정했으므로 클라이언트는 다음과 같이 호출한다. ::
 
    /fruits?model=apple&view=list
 
@@ -130,7 +134,10 @@ M2는 ``<Source>`` 설정에 따라 다음 주소를 호출한다. ::
    /fruits?model=[apple,banana,pineapple]&view=list
 
 
-위와 같이 ``#model`` 에 대응하는 값을 ``[ ... ]`` 형식으로 입력한다. 
+위와 같이 ``#model`` 에 대응하는 값을 ``[ ... ]`` 형식으로 입력한다.
+
+.. figure:: img/m2_userguide_21.png
+    :align: center
 
 
 ``<Source>`` 에 설정된 주소에 각각의 값을 바인딩하여 결과를 배열로 취합한다. ::
