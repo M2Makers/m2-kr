@@ -6,6 +6,9 @@
 이 장에서는 엔드포인트가 참조하는 오브젝트 모델인 ``M2-JSON`` 에 대해 설명한다.
 일반적으로 RESTful API로 제공되는 JSON이나, HTML처럼 사람이 읽을 수 있는 포맷을 의미한다. 
 
+.. figure:: img/m2_23.png
+    :align: center
+
 다음과 같이 엔드포인트가 설정되어 있다고 가정한다. ::
 
    # vhosts.xml - <Vhosts><Vhost><M2><Endpoints>
@@ -23,10 +26,6 @@
 
 M2-JSON 구조
 ====================================
-
-.. figure:: img/m2_23.png
-    :align: center
-    
 
 예를 들어 엔드포인트를 ``/fruits`` 로 설정했으므로 클라이언트는 다음과 같이 호출한다. ::
 
@@ -129,14 +128,12 @@ M2는 ``<Source>`` 설정에 따라 다음 주소를 호출한다. ::
 모델 배열
 ------------------------------------
 
-멀티 모델이 필요한 경우 배열을 사용한다. ::
+모델 배열이 필요한 경우 ``#model`` 값을 ``[ ... ]`` 형식으로 입력한다. ::
 
    /fruits?model=[apple,banana,pineapple]&view=list
 
 
-위와 같이 ``#model`` 에 대응하는 값을 ``[ ... ]`` 형식으로 입력한다.
-
-.. figure:: img/m2_userguide_21.png
+.. figure:: img/m2_21.png
     :align: center
 
 
