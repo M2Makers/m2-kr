@@ -35,7 +35,7 @@ M2는 Mid-Tier의 간단한 데이터 맵핑만으로 데이터가 바인딩된 
 이미지 서버
 ====================================
 
-가격, 재고, 판매량등의 실시간 정보가 반영되는 이미지를 제작한다.
+가격, 재고, 판매량등의 실시간 정보가 반영되는 이미지를 생산한다.
 
 .. figure:: img/m2_06.png
    :align: center
@@ -55,10 +55,17 @@ M2는 Mid-Tier의 간단한 데이터 맵핑만으로 데이터가 바인딩된 
 2차 이미지 가공               STON 이미지툴               추가 프로세스 필요
 =========================== ========================== ============================
 
-결과물은 `STON 이미지 툴 <https://ston.readthedocs.io/ko/latest/admin/image.html>`_ 과의 결합을 통해 사용성이 한층 높아진다. ::
+약속된 이미지 규격(View)에 상품정보를 결합하면 모든 상품의 이미지를 즉시 서비스하거나 변경할 수 있다.
+
+.. figure:: img/m2_16.png
+   :align: center
+
+
+`STON 이미지 툴 <https://ston.readthedocs.io/ko/latest/admin/image.html>`_ 과의 결합을 통해 사용성이 한층 높아진다. ::
 
    http://example.com/m2-endpoint?model=html&view=jpg/imagetool/resize/100x100
    http://example.com/m2-endpoint?model=html&view=jpg/imagetool/format/webp
+
 
 
 How it works
@@ -77,15 +84,44 @@ How it works
 상품기술서 최적화
 ====================================
 
-E-Commerce에서 가장 무거운 콘텐츠는 상품기술서이다. 특히 오픈마켓의 대다수 상품기술서는 셀러들에 의해 Decoupled 콘텐츠로 업로드되어 엔드유저에게 제공된다.
+상품기술서 관리가 어려운 이유는 개수가 많고 용량이 크기 때문이다.
+특히 셀러들에 의해 무분별하게 생성되는 기술서는 혼란을 가중시킨다.
 
 -  고용량 이미지 용량절감
+
+   .. figure:: img/m2_17.png
+      :align: center
+
+
 -  이미지 분할을 통한 로딩품질 개선
--  반응형 레이아웃 및 깨진 레이아웃 자동수정
--  깨진 외부 링크 방지
 
-이상의 기능들이 On-the-fly로 동작한다.
+   .. figure:: img/m2_18.png
+      :align: center
 
+-  반응형 레이아웃 및 스타일 최적화
+
+   .. figure:: img/m2_19.png
+      :align: center
+
+
+M2는 상품기술서나 백엔드 수정없이 즉시 원하는 스타일과 반응성을 제공한다.
+
+
+
+이미지 게이트웨이
+====================================
+
+백엔드 외부에 존재하는 이미지를 투명하게 자사 백엔드로 연동한다.
+
+.. figure:: img/m2_20.png
+   :align: center
+
+
+외부 이미지를 가져오는 동시에 여러 작업을 동시에 수행할 수 있다.
+
+-  이미지 최적화
+-  스토리지 백업 (S3 등)
+-  리포팅
 
 
 
