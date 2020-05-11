@@ -177,6 +177,8 @@ JPG, PNG, WEBP, BMP, PDF
       <meta name="m2-render-pdf" width="400" height="300" scale="1" margin-top="10px" margin-bottom="10px" margin-right="10px" margin-left="10px">
 
 
+.. _view-mp4-gif:
+
 MP4, GIF
 ------------------------------------
 

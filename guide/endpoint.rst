@@ -195,3 +195,31 @@ Body와 QueryString을 혼합해 사용 가능하다. ::
    
 
 -  ``<Module>`` 약속된 연동모듈을 ``Name`` 속성으로 로딩한다. 모듈의 파라미터는 값으로 전달한다.
+
+
+
+Default 엔드포인트
+====================================
+
+요청을 처리할 엔드포인트를 찾지 못한 경우 선택될 엔드포인트를 지정한다. 
+설정하지 않는다면 ``404 Not Found`` 로 응답한다. ::
+
+   # vhosts.xml - <Vhosts><Vhost><M2>
+
+   <Endpoints>
+      <Endpoint> ... </Endpoint>
+      <Endpoint> ... </Endpoint>
+      <Endpoint> ... </Endpoint>
+      
+      <Default>/myendpoint</Default>
+   </Endpoints>
+
+
+-  ``<Default>`` 엔드포인트의 ``<Path>``
+
+``<Default>`` 로 지정된 엔드포인트의 `확장모듈`_ 을 이용해 다양한 기능을 손쉽게 구현할 수 있다.
+
+-  기존 URL규칙에 대한 정교한 엔드포인트 분기
+-  HTTP 요청 조작
+-  통계수집
+-  인증
