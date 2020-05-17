@@ -15,7 +15,16 @@ Microservice로의 아키텍처 변화는 많은 장점을 가지지만, 데이�
 -  서버운영의 복잡성 증가와 비용상승
 -  기획/마케팅팀의 참여방해
 
-M2는 복잡한 단계를 압축하여 기획/마케팅팀에게 필요한 가시성있는 결과물을 즉시 생산한다.
+또한 이메일 클라이언트처럼 제약사항이 많은 환경이라면 고려사항이 더 많다.
+
+.. figure:: img/m2_32.png
+   :align: center
+
+   `메일침프 - Limitations of HTML Email <https://mailchimp.com/help/limitations-of-html-email/>`_ 발췌
+
+
+
+M2는 복잡한 단계를 압축할 뿐만 아니라 기획/마케팅팀에게 필요한 가시성있는 결과물을 일관성있게 생산한다.
 
 
 .. toctree::
