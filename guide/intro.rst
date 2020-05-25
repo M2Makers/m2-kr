@@ -4,7 +4,10 @@
 **********************************
 
 
-**M2** 는 E-Commerce의 **Headless/Decoupled CMS** 를 위한 미들웨어이다.
+**M2** 는 Micro-Service를 위한 콘텐츠 생산/통합 미들웨어이다.
+
+많은 인터넷 기술은 E-Commerce 시장의 성장과 함께해 왔다. 
+M2는 E-Commerce시장의 트렌드인 **Headless/Decoupled CMS** 와 밀접한 관계를 가진다.
 
 - 마케팅 민첩성(Agile marketing) 향상
 - 컨텐츠 생산공정/시간 단축
