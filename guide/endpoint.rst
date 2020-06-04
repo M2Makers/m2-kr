@@ -171,6 +171,8 @@ Body와 QueryString을 혼합해 사용 가능하다. ::
    }
 
 
+.. _endpoint-control-module:
+
 
 확장모듈
 ------------------------------------
