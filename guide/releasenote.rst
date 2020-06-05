@@ -10,7 +10,7 @@ v20.x
 ----------------------------
 
 - :ref:`endpoint-default` 추가
-- :ref:`endpoint-post-method` 에서 :ref:`endpoint-control-module` 지원ㄴ
+- :ref:`endpoint-post-method` 에서 :ref:`endpoint-control-module` 지원
 - ``m2-render-gif`` 렌더링 성능개선
 
 
