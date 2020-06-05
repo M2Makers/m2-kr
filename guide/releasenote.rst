@@ -6,6 +6,14 @@ Appendix A: 릴리스 노트
 v20.x
 ====================================
 
+20.05.0 (2020.5.27)
+----------------------------
+
+- :ref:`endpoint-default` 추가
+- :ref:`endpoint-post-method` 에서 :ref:`endpoint-control-module` 지원ㄴ
+- ``<meta name="m2-render-gif">`` 성능개선
+
+
 
 20.04.0 (2020.4.28)
 ----------------------------

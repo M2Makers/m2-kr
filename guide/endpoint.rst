@@ -122,6 +122,8 @@ GET Method
    GET /myendpoint?model=wine&view=soft
 
 
+.. _endpoint-post-method:
+
 POST Method
 ------------------------------------
 
@@ -199,6 +201,7 @@ Body와 QueryString을 혼합해 사용 가능하다. ::
 -  ``<Module>`` 약속된 연동모듈을 ``Name`` 속성으로 로딩한다. 모듈의 파라미터는 값으로 전달한다.
 
 
+.. _endpoint-default:
 
 Default 엔드포인트
 ====================================
