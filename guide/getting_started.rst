@@ -79,25 +79,45 @@ Cent OS 7.4이상만 지원한다.
 설치
 ====================================
 
-최신버전의 M2를 설치한다. ::
+1. 의존성 패키지를 설치한다. 쉘에서 다음 라인을 복사하여 실행한다. ::
 
-   [root@localhost ~]# curl -o- http://winesoft.co.kr/m2/install.sh | sudo bash
-   % Total    % Received % Xferd  Average Speed   Time    Time     Time  Current
-                                    Dload  Upload   Total   Spent    Left  Speed
-   100  1922  100  1922    0     0  85907      0 --:--:-- --:--:-- --:--:-- 87363
-   
-   ... (생략) ...
-
-   Installing M2  20.04.0
-   
-   ... (생략) ...      
-
-   Installation M2 Successfully
-   Usage) service ston start|stop|restart|status
+      [root@localhost ~]# yum -y install pango libXcomposite libXcursor libXdamage libXext libXi libXtst cups-libs libXScrnSaver libXrandr GConf2 alsa-lib atk gtk3 ipa-gothic-fonts xorg-x11-fonts-100dpi xorg-x11-fonts-75dpi xorg-x11-utils xorg-x11-fonts-cyrillic xorg-x11-fonts-Type1 xorg-x11-fonts-misc fontconfig unzip ImageMagick
 
 
-설치과정은 install.log에 기록된다. 로그를 통해 설치 중 발생하는 문제를 알 수 있다.
+2. M2 패키지를 다운로드 한다. ::
 
+      [root@localhost ~]# wget http://m2.winesoft.co.kr/m2-20.06.0.rhel.2.6.32.x64.tar.gz
+
+
+3. M2 패키지의 압축을 해지한다. ::
+
+		[root@localhost ~]# tar -zxf m2-20.06.0.rhel.2.6.32.x64.tar.gz
+
+
+4. M2 설치 스크립트를 실행한다.  ::
+
+      [root@localhost ~]# ./install_m2.sh
+      Installing M2  20.06.0
+      
+      ... (생략) ...      
+
+      Installation M2 Successfully
+      Usage) service ston start|stop|restart|status
+
+
+5. M2 서비스 데몬의 정상기동을 확인한다.  ::
+
+      [root@localhost ~]# # service ston status
+
+      stond Running
+      ┌─────┬───────┬─────────────┬─────────┬─────────┬──────────┬────────┬──────┬───────────┬──────────┬──────────┬──────────┬──────────┐
+      │ id  │ name  │ namespace   │ version │ mode    │ pid      │ uptime │ ↺    │ status    │ cpu      │ mem      │ user     │ watching │
+      ├─────┼───────┼─────────────┼─────────┼─────────┼──────────┼────────┼──────┼───────────┼──────────┼──────────┼──────────┼──────────┤
+      │ 0   │ m2    │ default     │ 20.06.0 │ cluster │ 3336     │ 19h    │ 0    │ online    │ 0.4%     │ 98.6mb   │ root     │ disabled │
+      │ 1   │ m2    │ default     │ 20.06.0 │ cluster │ 3343     │ 19h    │ 0    │ online    │ 0.4%     │ 107.1mb  │ root     │ disabled │
+      │ 2   │ m2    │ default     │ 20.06.0 │ cluster │ 3404     │ 19h    │ 0    │ online    │ 0.2%     │ 109.0mb  │ root     │ disabled │
+      │ 3   │ m2    │ default     │ 20.06.0 │ cluster │ 3410     │ 19h    │ 0    │ online    │ 0.2%     │ 96.4mb   │ root     │ disabled │
+      └─────┴───────┴─────────────┴─────────┴─────────┴──────────┴────────┴──────┴───────────┴──────────┴──────────┴──────────┴──────────┘
 
 
 
