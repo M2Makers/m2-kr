@@ -177,7 +177,7 @@ vhosts.xml 파일을 설정한다. ::
 
 ::
 
-   [root@localhost ~]# ./usr/local/ston/stonapi conf/reload
+   [root@localhost ~]# /usr/local/ston/stonapi conf/reload
 
 
 
