@@ -126,6 +126,69 @@ M2 트랜잭션이 비정상 처리되었다면 다음 헤더를 제공한다. :
 
 
 
+.. _op-log-fields:
+
+m2.log 파일
+------------------------------------
+
+M2가 진행하는 모든 HTTP 트랜잭션을 기록한다.
+기록 시점은 HTTP 트랜잭션이 완료되는 시점이며 전송완료 또는 전송중단 시점을 의미한다. ::
+
+   # server.xml - <Server><VHostDefault><Log>
+   # vhosts.xml - <Vhosts><Vhost><Log>
+
+   <M2 Type="time" Unit="1440" Retention="10">ON</M2>
+
+
+모든 필드는 공백으로 구분되며 각 필드의 의미는 다음과 같다.
+
+.. figure:: img/time_taken.jpg
+   :align: center
+
+   시간측정 구간
+
+-  ``date`` HTTP 트랜잭션이 완료된 날짜
+-  ``time`` HTTP 트랜잭션이 완료된 시간
+-  ``cs-sid`` 서비스 브로커(Service Broker)의 고유 ID. M2의 서비스 브로커는 내부적으로 여러 HTTP 트랜잭션을 포함한다. 서비스 브로커 ID를 통해 독립된 HTTP 트랜잭션을 연결한다.
+-  ``cs-tcount`` 서비스 브로커 내의 트랜잭션 카운트. 이 HTTP 트랜잭션이 현재 서비스 브로커에서 몇 번째로 처리된 트랜잭션인지 기록한다. 같은 ``cs-sid`` 값을 가지는 트랜잭션이라면 이 값은 중복될 수 없다.
+-  ``c-ip`` STON의 IP
+-  ``cs-method`` 원본서버에게 보낸 HTTP Method
+-  ``s-domain`` 원본서버 도메인
+-  ``cs-uri`` 원본서버에게 보낸 URI
+-  ``s-ip`` 원본서버 IP
+-  ``sc-status`` 원본서버 HTTP 응답코드
+-  ``cs-range`` 원본서버에게 보낸 Range요청 값
+-  ``sc-sock-error`` 소켓 에러코드
+   
+   -  ``Connect-Timeout`` 연결 시간초과
+   -  ``Receive-Timeout`` 수신대기 시간 초과
+   -  ``Server-Close`` 원본에서의 연결종료
+   -  ``Client-Close`` STON에서의 연결종료 (바이패스 중 클라이언트가 먼저 연결을 종료하는 경우)
+   -  ``Non-Existent-Domain`` 연결할 Domain이 존재하지 않음
+
+-  ``sc-http-error`` 원본서버가 4xx 또는 5xx응답을 줬을 때 응답코드를 기록
+-  ``sc-content-length`` 원본서버가 보낸 Content Length
+-  ``cs-requestsize (단위: Bytes)`` 원본서버로 보낸 HTTP 요청 헤더 크기
+-  ``sc-responsesize (단위: Bytes)`` 원본서버가 응답한 HTTP 헤더 크기
+-  ``sc-bytes (단위: Bytes)`` 수신한 컨텐츠 크기(헤더 제외)
+-  ``time-taken (단위: ms)`` HTTP 트랜잭션이 완료될 때까지 소요된 전체시간. 세션 재사용이 아니라면 소켓 접속시간까지 포함한다.
+-  ``time-dns (단위: ms)`` DNS쿼리에 소요된 시간
+-  ``time-connect (단위: ms)`` 원본서버와 소켓 Established까지 소요된 시간
+-  ``time-firstbyte (단위: ms)`` 요청을 보내고 응답이 올때까지 소요된 시간
+-  ``time-complete (단위: ms)`` 첫 응답부터 완료될 때까지 소요된 시간
+-  ``cs-reqinfo`` 부가 정보. "+"문자로 구분한다. 바이패스한 통신이라면 "Bypass", Private바이패스라면 "PrivateBypass"로 기록된다.
+-  ``cs-acceptencoding`` 원본서버에 압축된 컨텐츠를 요청하면 "gzip+deflate"로 기록된다.
+-  ``sc-cachecontrol`` 원본서버가 보낸 cache-control헤더
+-  ``s-port`` 원본서버 포트
+-  ``sc-contentencoding`` 원본서버가 보낸 Content-Encoding헤더
+-  ``session-id`` 원본서버 요청을 발생시킨 HTTP 클라이언트 세션 ID (unsigned int64)
+-  ``session-type`` 원본서버에 요청한 세션 타입
+
+   -  ``ref`` 리소스 참조
+
+
+
+
 
 .. _op-monitoring:
 
