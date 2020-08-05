@@ -9,8 +9,11 @@ M2는 플러그인 아키텍처로 각 모듈은 독립적으로 확장/교체 �
 .. figure:: img/m2_14.png
    :align: center
 
-M2는 캐싱엔진으로 `STON <https://ston.readthedocs.io/ko/latest/>`_ 을 사용한다. 
-따라서 이미 검증된 `STON <https://ston.readthedocs.io/ko/latest/>`_  기능들(설정, 로그, 통계, 모니터링 등)을 그대로 사용할 수 있다.
+
+.. note::
+
+   M2는 런타임(Runtime) 엔진으로 `STON <https://ston.readthedocs.io/ko/latest/>`_ 을 사용한다. 
+   따라서 이미 검증된 `STON <https://ston.readthedocs.io/ko/latest/>`_  기능들(설정, 로그, 통계, 모니터링 등)을 그대로 사용할 수 있다.
 
 
 
@@ -30,16 +33,6 @@ M2는 리눅스 서비스로 동작한다.
    service m2 stop
    service m2 restart
    service m2 status
-
-
-.. note::
-
-   STON에 익숙한 사용자를 위해 편의상 ston 명렁어도 동일하게 지원한다. ::
-
-      service ston start
-      service ston stop
-      service ston restart
-      service ston status
 
 
 .. _getting-started-sysconf:
