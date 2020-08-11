@@ -44,10 +44,23 @@ M2는 3가지의 로그를 제공하며 각 로그를 연결하는 필드는 다
 
 -  `origin.log <https://ston.readthedocs.io/ko/latest/admin/log.html#origin>`_ 
 
-   캐싱엔진에서 HIT되지 않고 M2모듈로 처리가 위임된 요청을 기록한다.
+   캐싱엔진에서 HIT되지 않고 M2모듈로 처리가 위임된 요청을 기록한다. ::
+
+       # server.xml - <Server><VHostDefault><Log>
+       # vhosts.xml - <Vhosts><Vhost><Log>
+
+       <Origin ExtraField="x-m2-tid">ON</Origin>
+
+   위와 같이 설정하여 M2 트랜잭션 ID를 origin.log의 ``x-sc-extra-field`` 필드에 기록한다. ::
+
+      #date      time     ...(생략)... session-id session-type x-sc-extra-field
+      2020-07-20 23:42:09 ...(생략)... 166        cache        1142daVjPqz5
+      2020-07-20 23:42:29 ...(생략)... 174        cache        1150S4kVS6hM
+
 
    -  ``session-id`` 원본서버(M2) 요청을 발생시킨 클라이언트 세션 ID. access.log의 ``session-id`` 와 같다.
-   -  ``sc-extra-field`` M2가 진행한 트랜잭션 ID   
+   -  ``session-type`` 항상 ``cache`` 이다.
+   -  ``x-sc-extra-field`` M2가 진행한 트랜잭션 ID (문자열)
 
 
 -  m2.log 
@@ -81,6 +94,9 @@ STON 로그 설정방식과 동일하며 가상호스트별로 설정한다. ::
    <M2 Type="time" Unit="1440" Retention="10">OFF</M2>
 
 M2 로그 필드는 STON의 `origin 로그 <https://ston.readthedocs.io/ko/latest/admin/log.html#origin>`_ 와 동일하다.
+
+
+ x-sc-extra-field
 
 
 .. _op-log-error-code:
