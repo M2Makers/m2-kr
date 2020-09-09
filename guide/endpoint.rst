@@ -228,6 +228,37 @@ Body와 QueryString을 혼합해 사용 가능하다. ::
 -  ``<Module>`` 약속된 연동모듈을 ``Name`` 속성으로 로딩한다. 모듈의 파라미터는 값으로 전달한다.
 
 
+.. _endpoint-control-error:
+
+커스텀 에러
+====================================
+
+네트워크 장애 등의 이유로 엔드포인트가 실패하면 디버깅 정보가 제공된다. 
+디버깅 정보가 아닌 좀 더 우아한 에러처리가 필요할 경우 커스텀 에러를 설정한다. ::
+
+   # vhosts.xml - <Vhosts><Vhost><M2><Endpoints>
+
+   <Endpoint>
+      <Model> ... </Model>
+      <Control> ... </Control>
+      <View> ... </View>
+      <Error ResCode="200" ContentType="image/gif">http://foo.com/default/error.gif</Error>
+   </Endpoint>
+   
+
+위와 같이 설정하면 엔드포인트가 정상적으로 콘텐츠를 생성하지 못할 때 ``http://foo.com/default/error.gif`` 콘텐츠가 ``200 OK`` 응답코드로 전송된다.
+
+-  ``ResCode (기본: 0)`` 응답코드를 설정한다. 
+   ``0`` 으로 설정한 경우 URL의 응답코드로 설정된다.
+-  ``ContentType`` 의 우선순위는 아래와 같다.
+   
+   1.  ``ContentType`` 속성 값
+   2.  `확장자 MimeType <https://svn.apache.org/repos/asf/httpd/httpd/trunk/docs/conf/mime.types>`_
+   3.  ``text/plain``
+
+
+
+
 .. _endpoint-default:
 
 Default 엔드포인트

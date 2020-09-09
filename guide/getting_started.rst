@@ -35,6 +35,19 @@ M2는 리눅스 서비스로 동작한다.
    service m2 status
 
 
+.. _getting-started-command-saferestart:
+
+무중단 재시작
+-----------------------------------------------
+
+서비스 중단없이 CPU 코어 단위로 서비스 데몬을 순차적으로 재기동한다. ::
+
+   service m2 saferestart
+
+30초마다 2개의 코어를 재시작한다.
+8코어로 구동되고 있다면 총 2분에 걸쳐 재가동이 진행된다.
+
+
 .. _getting-started-sysconf:
 
 시스템 구성
