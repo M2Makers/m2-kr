@@ -3,11 +3,11 @@
 1장. M2
 **********************************
 
-**M2** 는 실시간(On the fly) 파이프라인를 구현하는 미들웨어이다.
+**M2** 는 실시간(On the fly) 파이프라인를 구현하는 플랫폼이다.
 
 .. note::
 
-   ``M2`` 로 구현된 레퍼런스는 `Contents Service Patterns <https://csp-kr.readthedocs.io/ko/latest/>`_ 으로 제공된다.
+   ``M2`` 유스 케이스는 `Contents Service Patterns <https://csp-kr.readthedocs.io/ko/latest/>`_ 으로 제공된다.
 
 
 이 문서를 통해 왜 **M2** 의 On-the-fly가 최선의 **Workload Processing** 방식인지 설명한다.
