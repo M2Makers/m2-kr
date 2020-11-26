@@ -4,6 +4,12 @@
 ******************
 
 이 장에서는 M2의 활용범위 및 도입사례에 대해 설명한다.
+
+.. note::
+
+   `Contents Service Patterns <https://csp-kr.readthedocs.io/ko/latest/>`_ 을 통해 더 상세한 내용을 제공한다.
+
+
 Microservice로의 아키텍처 변화는 많은 장점을 가지지만, 데이터 바인딩과 통합문제는 단점으로 꼽힌다.
 
 .. figure:: img/m2_12.png
