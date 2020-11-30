@@ -1,4 +1,4 @@
-.. _engine-doc:
+.. _engine-caching:
 
 8장. 캐싱 엔진
 ******************
@@ -11,11 +11,19 @@
    :maxdepth: 2
 
 
+.. _engine-caching-transparency:
 
-.. _adv-vhost-link:
+위치 투명성
+====================================
+
+`인프라 구성 패턴 <https://csp-kr.readthedocs.io/ko/latest/patterns/pattern_infra.html>`_ 의 핵심은 위치 투명성이다. 
+확장된 기능을 통해 중단없는 마이그레이션이 가능하다.
+
+
+.. _engine-caching-vhost-link:
 
 가상호스트 링크
-====================================
+-------------------------------------------
 
 콘텐츠가 여러 원본에 분산되어 있다면, 가상호스트 링크를 활용하여 콘텐츠가 통합되어 있는 것처럼 서비스가 가능하다.
 
@@ -116,4 +124,95 @@
 * 자기 자신을 대상 가상호스트로 지정한 경우 (foo.com -> foo.com)
 * 재귀링크(Recursive Link)가 발생한 경우 (foo.com -> bar.com -> foo.com)
 
+
+
+.. _engine-caching-vhost-redirection-trace:
+
+Redirect 추적
+-------------------------------------------
+
+원본서버에서 Redirect계열(301, 302, 303, 307)로 응답하는 경우 ``Location`` 헤더를 추적하여 콘텐츠를 요청한다.
+
+   .. figure:: img/conf_redirectiontrace.png
+      :align: center
+
+      클라이언트는 Redirect여부를 모른다.
+
+::
+
+   # server.xml - <Server><VHostDefault><OriginOptions>
+   # vhosts.xml - <Vhosts><Vhost><OriginOptions>
+
+   <RedirectionTrace>OFF</RedirectionTrace>
+
+-  ``<RedirectionTrace>``
+
+   - ``OFF (기본)`` 3xx 응답으로 저장된다.
+
+   - ``ON`` Location헤더에 명시된 주소에서 콘텐츠를 다운로드 한다.
+     형식에 맞지 않거나 Location헤더가 없는 경우에는 동작하지 않는다.
+     무한히 Redirect되는 경우를 방지하기 위하여 1회만 추적한다.
+
+
+특정 URL 패턴에 대해서만 동작시킬 수 있다. ::
+
+   # server.xml - <Server><VHostDefault><OriginOptions>
+   # vhosts.xml - <Vhosts><Vhost><OriginOptions>
+
+   <RedirectionTrace ResCode="302,307">ON
+      <URL>*.ts</URL>
+      <URL>*.mp4</URL>
+   </RedirectionTrace>
+
+
+``<RedirectionTrace>`` 하위에 ``<URL>`` 들을 열거하면 ``Location`` 헤더 값의 특정 패턴에 대해서만 추적한다.
+
+
+
+.. _engine-caching-vhost-sub-path:
+
+Sub-Path 지정
+-------------------------------------------
+
+한 가상호스트에서 경로에 따라 다른 가상호스트가 처리하도록 설정할 수 있다.
+
+.. figure:: img/adv_vhost_subpath.png
+   :align: center
+
+   통계/로그는 요청을 최종처리한 각각의 가상호스트에 기록된다.
+
+
+::
+
+   # vhosts.xml - <Vhosts>
+
+   <Vhost Name="sports.com">
+     <Sub Status="Active">
+       <Path Vhost="baseball.com">/baseball/<Path>
+       <Path Vhost="football.com">/football/<Path>
+       <Path Vhost="photo.com">/*.jpg<Path>
+     </Sub>
+   </Vhost>
+
+   <Vhost Name="baseball.com" />
+   <Vhost Name="football.com" />
+   <Vhost Name="photo.com" />
+
+-  ``<Sub>`` 경로나 패턴이 일치하면 해당 요청을 다른 가상호스트로 보낸다.
+   일치하지 않는 경우만 현재 가상호스트가 처리한다.
+
+   - ``Status (기본: Active)`` Inactive인 경우 무시한다.
+
+   -  ``<Path>`` 클라이언트가 요청한 URI와 경로가 일치하면 ``Vhost`` 로 해당 요청을 보낸다.
+      값은 경로 또는 패턴만 가능하다. ::
+
+         <Path Vhost="baseball.com">baseball<Path>
+         <Path Vhost="photo.com">*.jpg<Path>
+
+      위와 같이 입력해도 각각 /baseball/과 /*.jpg로 인식된다.
+
+예를 들어 클라이언트가 다음과 같이 요청했다면 해당 요청은 가상호스트 football.com이 처리한다. ::
+
+   GET /football/rank.html HTTP/1.1
+   Host: sports.com
 
