@@ -38,6 +38,7 @@ M2 완벽 가이드
 .. toctree::
    :maxdepth: 2
 
+   guide/caching
    guide/image
    guide/video
    guide/crypt
