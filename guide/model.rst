@@ -273,8 +273,8 @@ HTML/XML
 ---------------------------------------
 
 -  ``HTML`` 과 ``XML`` 맵핑 규칙은 동일하며 추가적인 표현을 제공한다.
--  ``class`` 는 접두어 ``#`` 으로 참조한다.
--  ``id`` 는 접두어 . 으로 참조한다.
+-  ``class`` 는 접두어 ``.`` 으로 참조한다.
+-  ``id`` 는 접두어 ``#`` 으로 참조한다.
 -  ``<Element>`` 의 속성은 ``Element.속성키`` 으로 참조한다.
 
 ::
@@ -285,7 +285,7 @@ HTML/XML
       <!--
          .foo {color:red};
          #bar {color:yellow};
-         .foobar {color:cyan};
+         #foobar {color:cyan};
       //-->
       </style>
       <head>
