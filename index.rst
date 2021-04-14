@@ -43,6 +43,7 @@ M2 완벽 가이드
    guide/video
    guide/crypt
    guide/document
+   guide/prditem
 
 
 
