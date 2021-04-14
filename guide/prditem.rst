@@ -6,14 +6,57 @@
 상품기술서 엔진은 도큐먼트 엔진에서 파생된, E-Commerce 상품기술서에 특화된 엔진이다. 
 이 엔진을 통해 Mixed Contents 이슈 등 셀 수 없이 많은 상품기술서를 즉시 개선할 수 있다.
 
-설정 구조는 다음과 같다. ::
+상품기술서 엔진의 전체 설정구조와 기본 값은 다음과 같다. ::
 
    # /usr/local/m2/config-production.json
 
    {
       "m2": {
          "mixed" : {
-            ...
+            "traffic" : {
+               "domain" : null,
+               "fallback": {
+                  "enable" : true,
+                  "method" : "redirect",
+                  "conditions" : ["abort", "4xx", "5xx"]
+               }
+            },
+            "options" : {
+               "anchor" : false,
+               "schemeless" : false
+            },
+            "upgradeHttps" : {
+               "ip" : {
+                  "enable" : true
+               },
+               "retain" : {
+                  "enable" : true,
+                  "list" : []
+               },
+               "black" : {
+                  "enable" : true,
+                  "list" : []
+               },
+               "white" : {
+                  "enable" : true,
+                  "list" : []
+               },
+               "svldb" : {
+                  "url" : "https://svl.m2live.co.kr",
+                  "enable" : true,
+                  "report": {
+                     "enable": true,
+                     "schedule": "0 0 * * * *"
+                  },
+                  "update": {
+                     "enable": true,
+                     "schedule": "0 0 * * * *"
+                  }
+               },
+               "syntax" : {
+                  "enable" : true
+               }
+            }
          }
       }
    }
@@ -26,7 +69,7 @@
 
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 2 
 
 
 .. _engine-prditem-mixed-contents-traffic:
@@ -135,7 +178,7 @@ Mixed Contents 트래픽 상세
 ====================================
 
 
-메인 트래픽 ``/m2x/main``
+메인 트래픽 ``/m2x/mixed/main``
 ---------------------
 
 상품기술서 최상단에 있는 트래픽이다. 
@@ -149,7 +192,7 @@ Mixed Contents 트래픽 상세
 
 
 
-리바운드 트래픽 ``/m2x/rebound``
+리바운드 트래픽 ``/m2x/mixed/rebound``
 ---------------------
 웹 페이지는 구조적으로 다른 문서를 포함(Embed)할 수 있다. 
 
@@ -193,7 +236,7 @@ Browser에서 상품기술서가 로딩 된 이후에 발생하는 리바운드 
    따라서 검증된 메인 트래픽 URL인 ``/product/100`` 에 참조 소스를 덧 붙이는 규칙을 사용한다.
 
 
-리소스 트래픽 ``/m2x/resource``
+리소스 트래픽 ``/m2x/mixed/resource``
 ---------------------
 
 M2 도입 전 후 트래픽 흐름은 다음과 같이 바뀐다.
@@ -209,7 +252,7 @@ M2 도입 전 후 트래픽 흐름은 다음과 같이 바뀐다.
 리소스 트래픽의 대부분은 이미지이다. 
 이미지 서비스는 CDN 서비스를 이용하는 경우가 많아 다음과 같이 별도의 도메인 지정이 가능하다. ::
 
-   # m2.mixed
+   # m2.productDesc
 
    "traffics" : {
       "resource" : {
@@ -252,7 +295,7 @@ M2 도입 전 후 트래픽 흐름은 다음과 같이 바뀐다.
 
 M2는 이런 상황에서 클라이언트가 직접 외부 서비스를 호출할 대안(fallback)을 제공하여 서비스 가용성을 높인다. ::
 
-   # m2.mixed
+   # m2.productDesc.mixed
 
    "traffics" : {
       "fallback": {
@@ -316,11 +359,11 @@ Mixed Contents 엔진의 목적은 최소한의 ``URL`` 에 대해 SSL Onloading
 
 상품기술서 처리에 앞서 대상을 지정한다. ::
 
-   # m2.mixed
+   # m2.productDesc.mixed
 
    "options" : {
       "anchor" : false,
-      "schemeless" : false,
+      "schemeless" : false
    }
 
 
@@ -372,7 +415,7 @@ IP
 
 SSL Onloading 여부를 설정할 수 있다. ::
 
-   # m2.mixed
+   # m2.productDesc.mixed
 
    "upgradeHttps" : {
       "ip" : {
@@ -394,7 +437,7 @@ Retain List
 
 Retain List(유지목록)에 등록된 도메인에 대해서는 어떠한 처리도 수행하지 않는다. ::
 
-   # m2.mixed
+   # m2.productDesc.mixed
 
    "upgradeHttps" : {
       "retain" : {
