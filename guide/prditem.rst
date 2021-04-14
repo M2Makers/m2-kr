@@ -307,10 +307,10 @@ Mixed Contents 엔진의 목적은 최소한의 ``URL`` 에 대해 SSL Onloading
 
 
 *  ``IP`` IP 주소는 인증서를 탑재할 수 없다. SSL Onloading 한다.
-*  ``Remain List`` 등록된 도메인은 처리하지 않는다.
+*  ``Retain List`` 등록된 도메인은 처리하지 않는다.
 *  ``Black List`` 등록된 도메인은 강제로 SSL Onloading 시킨다.
 *  ``White List`` 등록된 도메인은 ``https://`` 프로토콜만 명시한다.
-*  ``SVL (SSL/TLS Validation List)`` m2live 서비스 데이터베이스를 참고하여 결정한다.
+*  ``SVL (SSL/TLS Validation List)`` `m2live 서비스 <https://svl.m2live.co.kr>`_ 데이터베이스를 참조한다.
 *  ``Syntax`` HTML 문법만으로 판단한다. ``http://`` 프로토콜 Scheme이 명시된 경우에만 SSL Onloading 한다.
 
 
@@ -356,7 +356,7 @@ Mixed Contents 엔진의 목적은 최소한의 ``URL`` 에 대해 SSL Onloading
 
 .. _engine-prditem-mixed-contents-ip:
 
-IP 정책
+IP
 ---------------------
 
 상품기술서 내에 IP를 포함하는 ``URL`` 을 처리한다. ::
@@ -376,22 +376,23 @@ SSL Onloading 여부를 설정할 수 있다. ::
 
    "upgradeHttps" : {
       "ip" : {
-         "proxy" : true
+         "enable" : true
       }
    }
 
--  ``proxy``
+-  ``enable``
 
    -  ``true (기본)`` IP를 SSL Onloading한다.
+   
    -  ``false`` IP를 처리하지 않는다.
 
 
-.. _engine-prditem-mixed-contents-remainlist:
+.. _engine-prditem-mixed-contents-retainlist:
 
-Remain List
+Retain List
 ---------------------
 
-Remain List(유지목록)에 등록된 도메인에 대해서는 어떠한 처리도 수행하지 않는다. ::
+Retain List(유지목록)에 등록된 도메인에 대해서는 어떠한 처리도 수행하지 않는다. ::
 
    # m2.mixed
 
@@ -581,6 +582,37 @@ URL 형식만 보고 문법적으로 판단한다. ::
 
    scheme이 생략된 URL(예. src="//foo.com/")은 HTTP 트랜잭션이 진행된 프로토콜을 따른다는 의미이기 때문에 처리하지 않는다.
 
+
+
+.. _engine-prditem-image:
+
+이미지 로딩개선
+====================================
+
+상품기술서를 구성하는 이미지는 매우 긴 경우가 많다. 
+
+.. figure:: img/prditem15.png
+   :align: center
+
+   2만 pixel이 넘는 이미지
+
+
+특히 모바일 환경이라면 보이지 않는 영역까지 로딩하거나, 너무 큰 이미지를 로딩하는 것은 고객 경험을 헤친다.
+
+
+M2는 서비스 품질을 개선하기 위해 상품기술서 내 이미지를 분석하여 분할, 최적화가 가능하다. ::
+
+   // 원본
+   https://example.com/product/100
+
+   // Mixed Contents 처리
+   https://example.com/product/100/m2x/mixed/main
+
+   // Mixed Contents 처리 + 이미지 분할로딩
+   https://example.com/product/100/m2x/mixed/main/image/split/400
+
+   // Mixed Contents 처리 + 이미지 분할로딩 + 이미지 최적화
+   https://example.com/product/100/m2x/mixed/main/image/split/400/optimize
 
 
 
