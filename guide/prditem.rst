@@ -13,8 +13,10 @@
    {
       "m2": {
          "mixed" : {
-            "traffic" : {
-               "domain" : null,
+            "traffics" : {
+               "resource" : {
+                  "domain" : null
+               },
                "fallback": {
                   "enable" : true,
                   "method" : "redirect",
