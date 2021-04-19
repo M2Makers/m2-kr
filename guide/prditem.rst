@@ -3,9 +3,7 @@
 13장. 상품기술서 엔진
 ******************
 
-상품기술서 엔진은 도큐먼트 엔진에서 파생된, E-Commerce 상품기술서에 특화된 엔진이다. 
-이 엔진을 통해 Mixed Contents 이슈 등 셀 수 없이 많은 상품기술서를 즉시 개선할 수 있다.
-
+상품기술서 엔진은 도큐먼트 엔진으로부터 진화된 E-Commerce 상품기술서 처리에 특화된 엔진이다. 
 상품기술서 엔진의 전체 설정구조와 기본 값은 다음과 같다. ::
 
    # /usr/local/m2/config-production.json
@@ -64,19 +62,81 @@
    }
 
 
-.. note::
-
-   가상호스트 또는 엔드포인트마다 설정을 달리하고 싶다면 call chain의 첫 단계로 설정을 재정의한다.
-
-
 
 .. toctree::
    :maxdepth: 2 
 
 
+
+.. note::
+
+   상품기술서 ``<HTML>`` 전체를 대상으로 하는 것보다 특정 
+
+https://m2-kr-next.readthedocs.io/ko/latest/guide/prditem.html#engine-prditem-mixed-contents-traffic
+
+
+
+.. _engine-prditem-area:
+
+상품기술서 처리영역 지정
+====================================
+
+상품기술서는 완전한 형태의 ``<HTML>`` 로 존재하는 경우가 많다.
+의사가 수술부위를 명확히 지정하는 것처럼 URL로 상품기술서 처리영역을 설정할 수 있다.
+
+.. figure:: img/prditem18.png
+   :align: center
+
+위 그림과 같이 파란영역이 수정범위인 경우를 예로 들어 설명한다.
+
+
+미지정
+---------------------
+
+별도의 영역 지정자를 설정하지 않는다. ::
+
+   https://.../m2x/mixed/main
+
+
+전체 페이지를 대상으로 상품기술서가 수정된다.
+
+.. figure:: img/prditem19.png
+   :align: center
+
+
+영역 선택
+---------------------
+
+``:`` 구분자로 처리할 영역을 `Document.querySelector() <https://developer.mozilla.org/ko/docs/Web/API/Document/querySelector>`_ 로 선택한다. ::
+
+   https://.../m2x/mixed/main:contents
+
+
+``contents`` 영역만을 대상으로 상품기술서가 수정되며, 그 외에는 수정하지 않는다.
+
+.. figure:: img/prditem20.png
+   :align: center
+
+
+
+영역 추출
+---------------------
+
+``!`` 구분자로 추출할 영역을 `Document.querySelector() <https://developer.mozilla.org/ko/docs/Web/API/Document/querySelector>`_ 로 선택한다. ::
+
+   https://.../m2x/mixed/main!contents
+
+
+``contents`` 영역만을 추출하여 상품기술서가 수정되며 응답한다.
+
+.. figure:: img/prditem21.png
+   :align: center
+
+
+
 .. _engine-prditem-mixed-contents-traffic:
 
-상품기술서 트래픽 라우팅
+상품기술서 트래픽 상세
 ====================================
 
 상품기술서를 웹 페이지에 포함시키는 패턴은 3가지가 존재한다. 
@@ -85,8 +145,9 @@
 -  독립 도메인 ``추천``
 -  통합 도메인
 
-고객 환경에 알맞은 구조를 통해 속도와 안정성을 확보한다. 
+서비스 환경과 구조에 맞추어야 내구성 높은 서비스 구축이 가능하다. 
 아래 그림 중 빨간 점선이 M2가 처리해야 하는 상품기술서 트래픽이다.
+
 
 
 웹페이지 Embed
@@ -130,12 +191,12 @@
 통합 도메인
 ---------------------
 
-`독립 도메인`_ 과 같은 방식이나 Top-level 페이지(메인 도메인)와 같은 도메인을 사용한다.
+`독립 도메인`_ 과 같은 방식이나 Top-level 페이지(보통 www 도메인)와 같은 도메인을 사용한다.
 
 .. figure:: img/prditem08.png
    :align: center
 
-이 구조에는 흔히 <프론트 캐시> 알려진 구조로 도입된다. 
+이 구조는 흔히 <프론트 캐시> 로 알려져있다. 
 M2의 URL 전처리 기능을 이용해 상품기술서 트래픽을 정확히 분리시켜야 한다. 
 
 도입 전 반드시 다음과 같이 처리할 상품기술서 URL 패턴이 확정되어야 한다.
@@ -165,25 +226,31 @@ M2의 URL 전처리 기능을 이용해 상품기술서 트래픽을 정확히 �
    - 상품기술서 패턴이 늘어날 때마다 M2에 추가해 주어야 한다.
 
 
-운영 편의성 측면에서도 <2. 독립 도메인> 방식이 강점을 가진다.
+.. note::
 
--  상품기술서와 부가 트래픽( ``<iframe>`` , http 이미지 등)을 분리해 정확히 모니터링/관리할 수 있다. 분리되어 있지 않다면 로그를 분석해야 한다.
--  상품기술서 트래픽을 손쉽게 CDN으로 위임할 수 있다.
--  상품기술서 정책이 수정되더라도 다른 백엔드 자원에 영향을 주지 않는다.
--  상품기술서 도메인을 <Web Server>로 위임하여 기존 구조로 쉽게 롤백할 수 있다.
+   운영 편의성 측면에서도 <2. 독립 도메인> 방식이 강점을 가진다.
+
+   -  상품기술서와 부가 트래픽( ``<iframe>`` , http 이미지 등)을 분리해 정확히 모니터링/관리할 수 있다. 분리되어 있지 않다면 로그를 분석해야 한다.
+   -  상품기술서 트래픽을 손쉽게 CDN으로 위임할 수 있다.
+   -  상품기술서 정책이 수정되더라도 다른 백엔드 자원에 영향을 주지 않는다.
+   -  상품기술서 도메인을 <Web Server>로 위임하여 기존 구조로 쉽게 롤백할 수 있다.
 
 
 
 .. _engine-prditem-mixed-traffic:
 
-Mixed Contents 트래픽 상세
+Mixed Contents - 트래픽 라우팅
 ====================================
+
+`Mixed Contents <https://csp-kr.readthedocs.io/ko/latest/patterns/pattern_webpage.html#mixed-contents>`_ 로 차단될 콘텐츠를 가장 안전하게 전송하는 방법은 SSL Onloading 이다.
+백엔드로 추가되는 트래픽의 종류와 처리방식에 대해 상세히 설명한다.
+
 
 
 메인 트래픽 ``/m2x/mixed/main``
 ---------------------
 
-상품기술서 최상단에 있는 트래픽이다. 
+상품기술서 ``<HTML>`` 을 전송하는 트래픽이다. 
 상품기술서에 대한 접근이 발생하는 위치에 따라 흐름이 달라진다.
 호출 방식에 따라 앞서 언급한 3가지로 구분된다.
 
@@ -341,7 +408,7 @@ M2는 이런 상황에서 클라이언트가 직접 외부 서비스를 호출�
 
 .. _engine-prditem-mixed-contents:
 
-Mixed Contents 처리
+Mixed Contents - SSL Onloading
 ====================================
 
 Mixed Contents 엔진의 목적은 최소한의 ``URL`` 에 대해 SSL Onloading 을 적용하는 것이다.
@@ -535,6 +602,7 @@ White List
   
 
 
+.. _engine-prditem-svl-db:
 
 SVL-DB
 ---------------------
@@ -629,6 +697,98 @@ URL 형식만 보고 문법적으로 판단한다. ::
 
 
 
+.. _engine-prditem-svl-service:
+
+Mixed Contents - SVL 서비스
+====================================
+
+SVL 서비스의 목적은 다음과 같은 
+
+-  Zero Configuration
+-  SSL Onloading 최소화
+-  Invalid(신뢰할 수 없는) 인증서 탐지
+-  서비스 포트에 대한 ``http/s`` 지원 검사
+
+
+SVL 서비스는 M2로 전송되는 모든 상품기술서 안의 도메인에 대해 ``http/s`` 지원을 감시한다.
+
+.. figure:: img/prditem00.png
+   :align: center
+
+   SVL 개념
+
+
+`SVL 상태페이지 <https://svl.m2live.co.kr/>`_ 를 통해 모니터링하는 도메인 목록을 투명하게 공개한다.
+
+.. figure:: img/prditem16.png
+   :align: center
+
+
+
+SVL-DB 동기화
+---------------------
+
+M2는 SVL 서비스를 통해 `SVL-DB`_ 를 동기화한다.
+
+.. figure:: img/prditem17.png
+   :align: center
+
+SVL-DB는 다음 상황에서 Full Sync되며 이후 변경사항에 대해서만 라이브 업데이트 받는다.
+
+-  최초 설치
+-  M2 실행
+-  로컬 SVL-DB 로딩실패
+-  라이브 업데이트 실패 후 재개
+-  Full Sync 커맨드 입력 ::
+
+      http://{m2-ip}:8585/command/svldb/sync
+
+
+info.log를 통해 SVL-DB 동기화 상태를 확인할 수 있다. ::
+
+      2020.12.16 07:06:10 [SVL-DB] full synced (total: 123,323)
+      2020.12.16 08:00:00 [SVL-DB] 37 domains updated (total: 123,360)
+      2020.12.16 09:00:00 [SVL-DB] fail to update
+      2020.12.16 10:00:00 [SVL-DB] fail to update
+      2020.12.16 11:00:00 [SVL-DB] full synced (total: 124,501)
+      
+
+.. note::
+
+   [M2를 신규로 도입하는 경우] 
+   
+   SVL 서비스에 신뢰 도메인을 미리 등록해두면 서비스 초기 SSL Onloading 트래픽을 최소화할 수 있다.
+   M2 기술지원 담당자에게 다음 정보를 제공한다.
+
+   -  상품기술서 access.log
+   -  신뢰 도메인 목록
+
+   `SVL 상태페이지 <https://svl.m2live.co.kr/>`_ 를 통해 제공한 도메인 상태를 열람한다.
+
+
+
+도메인목록 리포팅
+---------------------
+
+M2는 인덱싱한 도메인 목록을 ``m2.mixed.upgradeHttps.svldb.report.schedule`` 마다 SVL 서비스에 보고한다.
+M2와 ``https://svl.m2live.co.kr`` 의 통신이 가능해야 정상동작한다.      
+
+.. note::
+
+   ``https://svl.m2live.co.kr`` 와 정상통신할 수 없다면 다음과 같은 오류 메시지가 표시된다. ::
+
+      failed to report svl to https://svl.m2live.co.kr
+
+   보안이슈로 통신이 허가되지 않는다면 proxy를 두고, https://svl.m2live.co.kr로 포워딩한다. ::
+
+      "upgradeHttps" : {
+         "svldb" : {
+            "url" : "http://10.11.12.13"
+         }
+      }
+
+
+
 .. _engine-prditem-image:
 
 이미지 로딩개선
@@ -661,10 +821,101 @@ M2는 서비스 품질을 개선하기 위해 상품기술서 내 이미지를 �
 
 
 
-.. _engine-prditem-svl-details:
+.. _engine-prditem-responsive:
 
-SVL 연동 시나리오
+반응형 상품기술서
 ====================================
 
-SVL(SSL/TLS Validation List) 의 개념과 시나리오에 대해 설명한다.
-이번 주안에 완성예정
+`반응형 상품기술서 <https://csp-kr.readthedocs.io/ko/latest/patterns/pattern_webpage.html#pattern-webpage-responsive>`_ 패턴을 구현한다.
+
+-  고정형 상품기술서를 반응형 상품기술서로
+-  PC기준 웹페이지를 모바일로
+
+::
+
+   // 페이지 전체
+   https://example.com/products/100/m2x/mixed/responsive
+   
+   // <div id="prdDesc">
+   https://example.com/products/100/m2x/mixed/responsive/prdDesc
+  
+
+
+
+.. _engine-prditem-screenshot:
+
+스크린샷
+====================================
+
+스크린샷은 상품기술서 안의 리소스를 이미지로 렌더링하여 제공한다. 
+
+.. note::
+
+   상품기술서 ``<HTML>`` 을 ``JPG`` 로 변환하는 것이 아니다. 
+   상품기술서 ``<HTML>`` 은 유지하며 내부 리소스를 ``JPG`` 로 바꾸는 것이다.
+
+이미지로 렌더링된 리소스는 리소스 트래픽으로 제공된다. ::
+
+   https://example.com/products/100/m2x/mixed/screenshot
+   
+   https://example.com/products/100/m2x/mixed/screenshot/split/400
+
+   https://example.com/products/100/m2x/mixed/screenshot/split/400/optimize
+
+
+단순히 상품기술서 페이지를 이미지로 렌더링하는 것이 아닌 다음 요소들이 연동된다.
+
+-  YouTube 및 <iframe> 태그 인식
+-  Animated GIF 인식
+-  동적 Width
+-  이미지 분할 및 최적화
+
+::
+
+   # /usr/local/m2/config-production.json
+
+   {
+      "m2": {
+         "mixed" : {
+            "screenshot" : {
+               "mode" : "{ optimize | exclude-images | minimum | single }",
+            }
+         }
+      }
+   }
+
+
+-  ``screenshot``
+
+   -  ``optimize (기본)`` 태그를 기준으로영역을 분할하여 이미지로 생성한다.
+
+   -  ``exclude-images`` 이미지는 URL 그대로 유지하며, 텍스트 요소만 이미지로 생성한다.
+   
+   -  ``minimum`` 동적 리소스(<iframe>, Animated GIF)를 제외하고 이미지로 생성한다.
+   
+   -  ``single`` 화면 그대로 캡쳐한다.
+   
+
+.. note::
+
+   ``JPG`` 포맷의 가로, 세로 최대 길이는 65,535 pixel이다.
+   따라서 ``single`` 로 생성하는 경우 스크린샷이 실패할 수 있다.
+
+
+
+
+.. _engine-prditem-custom:
+
+커스터마이징
+====================================
+
+상품기술서 엔진의 표준 기능으로 구현이 어려운 기능들에 대해서는 커스터마이징을 지원한다. ::
+
+   // 형식
+   https://example.com/products/100/m2x/custom/{name}/{key-1}/{value-1}/{key-2}/{value-2}/...
+
+   // 예제
+   https://example.com/products/100/m2x/custom/winesoft
+   https://example.com/products/100/m2x/custom/watermark/width/800/token/xyz
+
+
