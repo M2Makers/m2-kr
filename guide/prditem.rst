@@ -54,7 +54,8 @@
                   }
                },
                "syntax" : {
-                  "enable" : true
+                  "enable" : true,
+                  "proxying" : "http"
                }
             }
          }
@@ -321,7 +322,7 @@ M2 도입 전 후 트래픽 흐름은 다음과 같이 바뀐다.
 리소스 트래픽의 대부분은 이미지이다. 
 이미지 서비스는 CDN 서비스를 이용하는 경우가 많아 다음과 같이 별도의 도메인 지정이 가능하다. ::
 
-   # m2.productDesc
+   # m2.mixed
 
    "traffics" : {
       "resource" : {
@@ -364,7 +365,7 @@ M2 도입 전 후 트래픽 흐름은 다음과 같이 바뀐다.
 
 M2는 이런 상황에서 클라이언트가 직접 외부 서비스를 호출할 대안(fallback)을 제공하여 서비스 가용성을 높인다. ::
 
-   # m2.productDesc.mixed
+   # m2.mixed
 
    "traffics" : {
       "fallback": {
@@ -428,7 +429,7 @@ Mixed Contents 엔진의 목적은 최소한의 ``URL`` 에 대해 SSL Onloading
 
 상품기술서 처리에 앞서 대상을 지정한다. ::
 
-   # m2.productDesc.mixed
+   # m2.mixed
 
    "options" : {
       "anchor" : false,
@@ -484,7 +485,7 @@ IP
 
 SSL Onloading 여부를 설정할 수 있다. ::
 
-   # m2.productDesc.mixed
+   # m2.mixed
 
    "upgradeHttps" : {
       "ip" : {
@@ -506,7 +507,7 @@ Retain List
 
 Retain List(유지목록)에 등록된 도메인에 대해서는 어떠한 처리도 수행하지 않는다. ::
 
-   # m2.productDesc.mixed
+   # m2.mixed
 
    "upgradeHttps" : {
       "retain" : {
@@ -664,8 +665,8 @@ SVL-DB를 연동하는 방식에 대해 설정한다. ::
 
    <img src="https://foo.com/1.jpg">   // upgrade
    <img src="https://foo.com/2.jpg">   // do nothing
-   <img src="https://example.com/.../m2x/mixed/resource/http://bar.com/3.jpg">  // proxy + downgrade
-   <img src="https://example.com/.../m2x/mixed/resource/http://bar.com/4.jpg">  // proxy
+   <img src="https://example.com/.../m2x/mixed/resource/http://bar.com/3.jpg">  // proxying
+   <img src="https://example.com/.../m2x/mixed/resource/http://bar.com/4.jpg">  // proxying + downgrade
 
          
 
@@ -678,7 +679,8 @@ URL 형식만 보고 문법적으로 판단한다. ::
 
    "upgradeHttps" : {
       "syntax" : {
-         "enable" : true
+         "enable" : true,
+         "proxying" : "http"
       }
    }
 
@@ -686,9 +688,15 @@ URL 형식만 보고 문법적으로 판단한다. ::
 
    -  ``enable``
       
-      -  ``true (기본)`` http:// 로 시작되는 URL만 SSL Onloading한다.
+      -  ``true (기본)`` URL 형식에 따라 SSL Onloading한다.
 
       -  ``false`` 아무 것도 하지 않는다.
+
+   -  ``proxying``
+      
+      -  ``http (기본)`` http:// 로 시작되는 URL만 SSL Onloading한다.
+
+      -  ``all`` 프로토콜에 관계없이 모두 SSL Onloading한다.
 
 
 .. note::
@@ -837,7 +845,8 @@ M2는 서비스 품질을 개선하기 위해 상품기술서 내 이미지를 �
    https://example.com/products/100/m2x/mixed/responsive
    
    // <div id="prdDesc">
-   https://example.com/products/100/m2x/mixed/responsive/prdDesc
+   https://example.com/products/100/m2x/mixed/responsive:prdDesc
+   https://example.com/products/100/m2x/mixed/responsive!prdDesc
   
 
 
