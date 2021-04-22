@@ -202,7 +202,9 @@ M2가 진행하는 모든 HTTP 트랜잭션을 기록한다.
 
    -  ``ref`` 리소스 참조
 
+-  ``m2x-engine`` 콘텐츠 처리에 사용된 M2 엔진의 처리로그로 QueryString 형식으로 기록된다.
 
+   -  :ref:`engine-prditem-mixed-log`
 
 
 
