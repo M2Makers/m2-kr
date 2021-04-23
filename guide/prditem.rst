@@ -478,7 +478,7 @@ IP
 위 태그는 다음과 같이 변환된다. ::
 
    <img src="https://example.com/.../m2x/mixed/resource/http://182.162.143.217/cob/20FW/20FW_main2_kid780.jpg">
-   <img src="https://example.com/.../m2x/mixed/resource/"http://182.162.143.217:8080/cob/20FW/20FW_main2_kid781.jpg">">
+   <img src="https://example.com/.../m2x/mixed/resource/http://182.162.143.217:8080/cob/20FW/20FW_main2_kid781.jpg">">
 
 
 SSL Onloading 여부를 설정할 수 있다. ::
@@ -646,7 +646,7 @@ SVL-DB를 연동하는 방식에 대해 설정한다. ::
 1시간마다 도메인 목록을 보고하며 SVL-DB를 업데이트한다. 
 
 
-다음과 같이 도메인에 대한 http, https 서비스가 불안정한 상태를 예로 들어보자.
+다음과 같이 일부 프로토콜만 지원하는 상황이 발생할 수 있다.
 
 .. figure:: img/prditem02.png
    :align: center
@@ -708,7 +708,7 @@ URL 형식만 보고 문법적으로 판단한다. ::
 Mixed Contents - SVL 서비스
 ====================================
 
-SVL 서비스의 목적은 다음과 같은 
+SVL 서비스의 목적은 아래와 같다.
 
 -  Zero Configuration
 -  SSL Onloading 최소화
@@ -1042,15 +1042,15 @@ base64 이미지 지원
          },
          {
             "type": "image",
-            "type": "http://example.com/image/67/01/67018014_161423634296_0.jpg",
+            "type": "https://foo.com/image/67/01/67018014_161423634296_0.jpg",
          },
          {
             "type": "html",
-            "type": "<iframe id=\"prdDetailIfr\" name=\"prdDetailIfr\" src=\"\/mi15\/prd\/prdImgDesc.gs?prdid=67420469&amp;prdGbnCd=60&amp;subSupCd=\" scrolling=\"no\" frameborder=\"0\" width=\"720\" height=\"0\" title=\"\uC0C1\uD488 \uC0C1\uC138\uC124\uBA85 (\uAE30\uC220\uC11C) iframe\" style=\"height: 23542px;\"><\/iframe>",
+            "type": "<iframe id=\"prdDetailIfr\" name=\"prdDetailIfr\" src=\"\/prd\/desc?id=100\" scrolling=\"no\" frameborder=\"0\" width=\"720\" height=\"0\"><\/iframe>",
          },
          {
             "type": "image",
-            "type": "http://example.com/image/67/01/67018014_161423634296_1.jpg",
+            "type": "https://bar.com/image/67/01/67018014_161423634296_1.jpg",
          }
       ]
    }
