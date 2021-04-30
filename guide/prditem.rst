@@ -133,6 +133,29 @@
 
 
 
+.. _engine-prditem-area-json:
+
+JSON
+---------------------
+
+상품기술서 ``<HTML>`` 이 ``JSON`` 내부에 저장된 경우, JSON 노드표현이 가능하다. ::
+
+   {
+      "data": {
+         "goodsItem": {
+            "desc": "<img src='http://foo.com'>"
+         }
+      }
+   }
+
+단, 이 경우는 본문이 ``JSON`` 이기 때문에 ``/mainjson`` 키워드를 사용한다. ::
+
+   https://.../m2x/mixed/mainjson:data.goodsItem.desc
+   https://.../m2x/mixed/mainjson!data.goodsItem.desc
+
+
+
+
 .. _engine-prditem-mixed-contents-traffic:
 
 상품기술서 트래픽 상세
@@ -144,8 +167,11 @@
 -  독립 도메인 ``추천``
 -  통합 도메인
 
-서비스 환경과 구조에 맞추어야 내구성 높은 서비스 구축이 가능하다. 
-아래 그림 중 빨간 점선이 M2가 처리해야 하는 상품기술서 트래픽이다.
+
+각 구조별로 상품 페이지를 완성하기까지의 과정을 단계별로 알아본다.
+
+.. figure:: img/prditem24.png
+   :align: center
 
 
 
@@ -166,6 +192,25 @@
 
 <Web Server>는 기존과 동일한 방식으로 웹 페이지에 상품기술서를 삽입한다.
 
+.. figure:: img/prditem25.png
+   :align: center
+
+
+1.  ``메인 트래픽(Red)`` 브라우저가 상품페이지를 <Web Server>로 요청한다.
+    <Web Server>는 <M2> 로부터 "수정된" 상품기술서를 받아 웹페이지에 삽입한다.
+
+2.  ``리바운드 트래픽(Green)`` 브라우저는 상품기술서 안에서 참조하는 document( ``css`` , ``js`` , ``<iframe>`` 등)를 <M2> 로 요청한다.
+
+3.  ``리소스 트래픽(Blue)`` 브라우저는 상품기술서 안에서 참조하는 이미지를 <CDN> 또는 <HTTPS를 지원하는 셀러 사이트>로 요청한다.
+    <CDN>은 <M2> 를 원본서버로 바라본다.
+
+
+.. note::
+
+   신규 도메인
+
+   -  ``m2cdn.example.com`` 상품기술서에서 파생된 리소스 트래픽을 <CDN>에 위임하는 용도
+
 
 
 독립 도메인
@@ -183,7 +228,32 @@
 .. figure:: img/prditem07.png
    :align: center
 
-상품기술서가 포함하는 ``<iframe>`` 이 내부적으로 다른 ``<iframe>`` 을 포함하여도 트래픽이 M2로 자연스럽게 유입된다.
+상품기술서가 포함하는 ``<iframe>`` 이 내부적으로 다른 ``<iframe>`` 을 포함하여도 트래픽이 <M2>로 자연스럽게 유입된다.
+
+
+.. figure:: img/prditem27.png
+   :align: center
+
+
+0.  브라우저는 <Web Server>로부터 상품페이지를 로딩한다.
+
+1.  ``메인 트래픽(Red)`` <M2>는 <Web Server>와 독립된 도메인으로 서비스된다.
+    브라우저가 "수정된" 상품기술서를 <M2> 로부터 로딩한다.
+
+2.  ``리바운드 트래픽(Green)`` 브라우저는 상품기술서 안에서 참조하는 document( ``css`` , ``js`` , ``<iframe>`` 등)를 <M2> 로 요청한다.
+
+3.  ``리소스 트래픽(Blue)`` 브라우저는 상품기술서 안에서 참조하는 이미지를 <CDN> 또는 <HTTPS를 지원하는 셀러 사이트>로 요청한다.
+    <CDN>은 <M2> 를 원본서버로 바라본다.
+
+
+.. note::
+
+   신규 도메인
+   
+   -  ``m2.example.com`` 상품기술서 메인/리바운드 트래픽을 <M2>로 라우팅 시키는 용도
+   -  ``m2cdn.example.com`` 상품기술서에서 파생된 리소스 트래픽을 <CDN>에 위임하는 용도
+
+   만약 상품기술서 트래픽 전부를 CDN에 위임한다면 1개의 도메인으로 서비스가 가능하다.
 
 
 
@@ -203,8 +273,30 @@ M2의 URL 전처리 기능을 이용해 상품기술서 트래픽을 정확히 �
 .. figure:: img/prditem09.png
    :align: center
 
-또는 <Web Server>가 상품기술서 트래픽만을 분리하여 M2로 위임하는 방식도 가능하지만 매우 위험하다. 
-왜냐하면 M2는 상품기술서를 찾기 위해 다시 <Web Server>로 요청하게 되어 트래픽 Loop가 발생할 수 있기 때문이다.
+또는 <Web Server>가 상품기술서 트래픽만을 분리하여 <M2>로 위임하는 방식도 가능하지만 매우 위험하다. 
+왜냐하면 <M2>는 상품기술서를 찾기 위해 다시 <Web Server>로 요청하게 되어 트래픽 Loop가 발생할 수 있기 때문이다.
+
+
+.. figure:: img/prditem26.png
+   :align: center
+
+
+0.  브라우저는 <Web Server>로부터 상품페이지를 로딩한다. <M2>는 바이패스할 뿐 관여하지 않는다.
+
+1.  ``메인 트래픽(Red)``  <M2>는 <Web Server>와 동일한 도메인으로 서비스된다.
+    브라우저가 "수정된" 상품기술서를 <M2> 로부터 로딩한다.
+
+2.  ``리바운드 트래픽(Green)`` 브라우저는 상품기술서 안에서 참조하는 document( ``css`` , ``js`` , ``<iframe>`` 등)를 <M2> 로 요청한다.
+
+3.  ``리소스 트래픽(Blue)`` 브라우저는 상품기술서 안에서 참조하는 이미지를 <CDN> 또는 <HTTPS를 지원하는 셀러 사이트>로 요청한다.
+    <CDN>은 <M2> 를 원본서버로 바라본다.
+
+
+.. note::
+
+   신규 도메인
+
+   -  ``m2cdn.example.com`` 상품기술서에서 파생된 리소스 트래픽을 <CDN>에 위임하는 용도
 
 
 
@@ -431,7 +523,8 @@ Mixed Contents 엔진의 목적은 최소한의 ``URL`` 에 대해 SSL Onloading
 
    "options" : {
       "anchor" : false,
-      "schemeless" : false
+      "schemeless" : false,
+      "escapeJson" : true
    }
 
 
@@ -463,6 +556,11 @@ Mixed Contents 엔진의 목적은 최소한의 ``URL`` 에 대해 SSL Onloading
             // TO-BE
             <script src="http://foo.com/common.js">
 
+   - ``escapeJson`` JSON에 포함된 상품기술서 ``<HTML>`` 의 escape 문자를 치환한다.
+
+      -  ``true (기본)`` 치환한다.
+
+      -  ``false`` 치환하지 않는다.
 
 
 .. _engine-prditem-mixed-contents-ip:
@@ -1072,6 +1170,82 @@ base64 이미지 지원
    -  링크되거나 렌더링되는 모든 이미지에 대한 분할, 최적화가 가능하다.
    -  `data-src 속성 지원`_ , `base64 이미지 지원`_ , `원본주소 암호화`_ 를 모두 지원한다.
    
+
+
+태그 수정
+---------------------
+
+상품기술서의 태그를 수정한다. ::
+
+   # m2.mixed
+
+   "edit" : {
+      "delete" : {
+         "enable" : false,
+         "includeChild" : true,
+         "elements" : [
+            "applet", 
+            "acronym",
+            "bgsound",
+            "dir", 
+            "frame", 
+            "frameset", 
+            "noframes",
+            "hgroup",
+            "isindex",
+            "listing",
+            "nextid",
+            "noembed",
+            "plaintext",
+            "strike",
+            "xmp",
+            "basefont",
+            "big",
+            "blink",
+            "center",
+            "font",
+            "marquee",
+            "menu",
+            "menuitem,
+            "multicol",
+            "nobr",
+            "spacer",
+            "tt",
+            "rb",
+            "rtc",
+            
+         ]
+      }
+   }
+
+
+-  ``delete`` 상품기술서내 태그를 삭제한다.
+
+   -  ``enable (기본: false)`` 활성화 설정. ``true`` 인 경우에만 ``elements`` 목록에 있는 태그들을 삭제한다.
+
+   -  ``includeChild (기본: true)`` 삭제될 태그의 자식들까지 삭제한다.
+      이 값이 ``false`` 라면 다음과 같이 해당 태그만 삭제한다. ::
+
+         // 원문
+         <center>
+            <p>text</p>
+         </center>
+
+         // 수정 - <center> 태그 삭제
+            <p>text</p>
+
+
+   -  ``elements`` 삭제할 태그 목록을 지정한다.
+
+
+이 기능은 `deprecated <https://www.tutorialspoint.com/html/html_deprecated_tags.htm>`_ , `obsolete <https://www.w3.org/TR/html52/obsolete.html#non-conforming-features>`_ 요소들을 상품기술서에서 삭제할 목적으로 개발되었다.
+따라서 기본 설정은 `deprecated <https://www.tutorialspoint.com/html/html_deprecated_tags.htm>`_ , `obsolete <https://www.w3.org/TR/html52/obsolete.html#non-conforming-features>`_ 에서 언급된 목록들을 포함하여 배포되지만, 임의의 태그를 추가하여도 동작한다.
+
+
+.. note:
+
+   `W3C - Obsolete features <https://www.w3.org/TR/html52/obsolete.html#obsolete>`_ 는 꾸준히 제안되고 있으며, M2는 ``HTML 5.2`` 제안을 따른다.
+
 
 
 .. _engine-prditem-mixed-log:
