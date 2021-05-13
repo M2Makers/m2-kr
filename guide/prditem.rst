@@ -1228,6 +1228,9 @@ base64 이미지 지원
    }
 
 
+
+.. _engine-prditem-edit-prereplacesource:
+
 텍스트 치환
 ---------------------
 
@@ -1256,6 +1259,8 @@ base64 이미지 지원
 이 기능은 텍스트 에디터의 Replace 기능과 같다.
 
 
+
+.. _engine-prditem-edit-delete:
 
 태그 제거
 ---------------------
