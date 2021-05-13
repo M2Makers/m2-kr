@@ -22,8 +22,16 @@
                }
             },
             "options" : {
-               "anchor" : false,
-               "schemeless" : false
+               "anchor" : {
+                  "enable": false
+               },
+               "schemeless" : {
+                  "enable": false,
+                  "originProtocol" : "http"
+               },
+               "escapeJson" : {
+                  "enable": true
+               }
             },
             "upgradeHttps" : {
                "ip" : {
@@ -57,6 +65,10 @@
                   "enable" : true,
                   "proxying" : "http"
                }
+            },
+            "edit" : {
+               "preReplaceSource" : { ... },
+               "delete" : { ... }
             }
          }
       }
@@ -517,14 +529,21 @@ Mixed Contents 엔진의 목적은 최소한의 ``URL`` 에 대해 SSL Onloading
 *  ``Syntax`` HTML 문법만으로 판단한다.
 
 
-상품기술서 처리에 앞서 대상을 지정한다. ::
+상품기술서 SSL Onloading 처리에 앞서 대상을 지정한다. ::
 
    # m2.mixed
 
    "options" : {
-      "anchor" : false,
-      "schemeless" : false,
-      "escapeJson" : true
+      "anchor" : {
+         "enable": false
+      },
+      "schemeless" : {
+         "enable": false,
+         "originProtocol" : "http"
+      },
+      "escapeJson" : {
+         "enable": true
+      }
    }
 
 
@@ -532,35 +551,56 @@ Mixed Contents 엔진의 목적은 최소한의 ``URL`` 에 대해 SSL Onloading
 
    -  ``anchor`` 앵커태그 ``<a href="http://...">`` 에 대한 처리정책을 설정한다.
 
-      -  ``false (기본)`` 수정하지 않는다.
+      -  ``enable``
 
-      -  ``true`` Mixed Contents 정책에 따라 https로 업그레이드만 진행하며 proxying 하지 않는다. ::
-      
-            // AS-IS
-            <a href="http://foo.com/index.html">
+         -  ``false (기본)`` 수정하지 않는다.
 
-            // TO-BE
-            <a href="https://foo.com/index.html">
+         -  ``true`` Mixed Contents 정책에 따라 https로 업그레이드만 진행하며 proxying 하지 않는다. ::
+         
+               // AS-IS
+               <a href="http://foo.com/index.html">
+
+               // TO-BE
+               <a href="https://foo.com/index.html">
 
 
 
    -  ``schemeless`` scheme이 생략된 URL에  대한 동작방식을 설정한다.
 
-      -  ``false (기본)`` 수정하지 않는다.
+      -  ``enable``
 
-      -  ``true`` 상품기술서내의 다른 리소스와 동일하게 처리한다. scheme을 명확히 지정한다. ::
+         -  ``false (기본)`` 수정하지 않는다.
 
-            // AS-IS
-            <script src="//foo.com/common.js">
+         -  ``true`` 상품기술서내의 다른 리소스와 동일하게 처리한다. scheme을 명확히 지정한다. ::
 
-            // TO-BE
-            <script src="http://foo.com/common.js">
+               // AS-IS
+               <script src="//foo.com/common.js">
+
+               // TO-BE
+               <script src="https://foo.com/common.js">
+
+
+      -  ``originProtocol`` SSL onloading을 해야하는 경우 원본 프로토콜을 설정한다. ::
+
+               <script src="//foo.com/common.js">
+
+
+         -  ``http (기본)`` http 프로토콜을 사용한다. ::
+
+               <script src=".../m2x/mixed/resource/http://foo.com/common.js">
+
+
+         -  ``https`` https 프로토콜을 사용한다. ::
+
+               <script src=".../m2x/mixed/resource/https://foo.com/common.js">
+
 
    - ``escapeJson`` JSON에 포함된 상품기술서 ``<HTML>`` 의 escape 문자를 치환한다.
 
       -  ``true (기본)`` 치환한다.
 
       -  ``false`` 치환하지 않는다.
+
 
 
 .. _engine-prditem-mixed-contents-ip:
@@ -1171,13 +1211,56 @@ base64 이미지 지원
    -  `data-src 속성 지원`_ , `base64 이미지 지원`_ , `원본주소 암호화`_ 를 모두 지원한다.
    
 
+
+
 .. _engine-prditem-edit:
 
+상품기술서 수정 ``dev``
+====================================
 
-태그 수정
+상품기술서 중 문자열을 치환하거나 유해 태그등을 삭제한다. ::
+
+   # m2.mixed
+
+   "edit" : {
+      "preReplaceSource" : { },
+      "delete" : { }
+   }
+
+
+텍스트 치환
 ---------------------
 
-상품기술서의 태그를 수정한다. ::
+상품기술서 분석 이전에 소스 상태에서 문자열을 치환한다. ::
+
+   # m2.mixed
+
+   "edit" : {
+      "preReplaceSource" : {
+         "enable" : false,
+         "list" : [
+            {
+               "src" : "://foo.com/",
+               "dest" : "://new.foo.com/"
+            },
+            {
+               "src" : ".bar.com/image/",
+               "dest" : ".bar.com/s3/image/"
+            }
+         ]
+      }
+   }
+
+
+상품기술서를 파싱하기 이전 텍스트 단계에서 ``src`` 를 ``dest`` 로 치환한다. 
+이 기능은 텍스트 에디터의 Replace 기능과 같다.
+
+
+
+태그 제거
+---------------------
+
+상품기술서 내 유해 태그등을 삭제한다. ::
 
    # m2.mixed
 
