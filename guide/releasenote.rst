@@ -11,7 +11,7 @@ v21.x
 
 -  `SVL 서비스 <https://svl.m2live.co.kr/>`_ 리뉴얼
 -  :ref:`engine-prditem-mixed-log` 추가
--  M2 Hooking 함수 추가
+-  Hooking 함수 추가
 
 
 **버그수정**
