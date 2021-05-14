@@ -9,7 +9,7 @@ v21.x
 21.05.0 (2021.05.14)
 ----------------------------
 
--  `SVL 서비스 <https://svl.m2live.co.kr/>`_ 리뉴얼
+-  `SVL(SSL/TLS Validation List) 서비스 <https://svl.m2live.co.kr/>`_ 리뉴얼
 -  :ref:`engine-prditem-mixed-log` 추가
 -  Hooking 함수 추가
 
@@ -19,7 +19,7 @@ v21.x
 -  상품기술서 엔진
    
    -  ``Style Sheet`` 로 삽입 된 이미지가 SSL Onloading 되지 않던 증상 수정
-   -  ``Transfer-Encoding`` 로 전송된 이미지를 분할로딩시 여러 장으로 노출되던 증상 수정
+   -  ``Transfer-Encoding`` 으로 전송된 이미지를 분할로딩시 여러 장으로 노출되던 증상 수정
    -  이미지 분할로딩시 ``SVL`` 처리된 호스트의 이미지에 대해 최적화가 적용되지 않던 증상 수정
 
 -  Access로그에 ``referer`` , ``user-agent`` 필드가 ``undefined`` 로 기록되던 증상 수정
