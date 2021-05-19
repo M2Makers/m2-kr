@@ -509,6 +509,217 @@ M2는 이런 상황에서 클라이언트가 직접 외부 서비스를 호출�
 
 
 
+.. _engine-prditem-mixed-options:
+
+Mixed Contents - 처리옵션
+====================================
+
+상품기술서 SSL Onloading 이외의 세부 처리정책을 구성한다. 
+
+
+.. _engine-prditem-mixed-options-anchor:
+
+
+앵커태그
+---------------------
+
+앵커태그 ``<a href="http://...">`` 에 대한 처리정책을 설정한다. ::
+
+   # m2.mixed.options
+
+   "anchor" : {
+      "enable": false
+   }
+
+
+``enable(기본: false)`` 설정이 ``true`` 라면 Mixed Contents 정책에 따라 ``https``로 업그레이드만 진행하며 proxying 하지 않는다. ::
+
+   // AS-IS
+   <a href="http://foo.com/index.html">
+
+   // TO-BE
+   <a href="https://foo.com/index.html">
+
+
+
+.. _engine-prditem-mixed-options-schemeless:
+
+scheme 생략 URL
+---------------------
+
+scheme이 생략된 URL에  대한 동작방식을 설정한다. ::
+
+   # m2.mixed.options
+
+   "schemeless" : {
+      "enable": false,
+      "originProtocol" : "http"
+   }
+
+``enable(기본: false)`` 설정이 ``true`` 라면 상품기술서내의 다른 리소스와 동일하게 처리한다. scheme을 명확히 지정한다. ::
+
+   // AS-IS
+   <script src="//foo.com/common.js">
+
+   // TO-BE
+   <script src="https://foo.com/common.js">
+
+
+SSL onloading을 해야하는 경우 ``originProtocol (기본: http)`` 설정으로 원본 프로토콜을 선택한다. ::
+
+   <script src="//foo.com/common.js">
+
+
+   -  ``http (기본)`` http 프로토콜을 사용한다. ::
+
+         <script src=".../m2x/mixed/resource/http://foo.com/common.js">
+
+
+   -  ``https`` https 프로토콜을 사용한다. ::
+
+         <script src=".../m2x/mixed/resource/https://foo.com/common.js">
+
+
+
+.. _engine-prditem-mixed-options-sizeLimit:
+
+상품기술서 용량제한
+---------------------
+
+지나치게 큰 상품기술서를 ``DOM`` 로딩할 경우 메모리 과다사용으로 인한 성능저하가 발생할 수 있다. ::
+
+   # m2.mixed.options
+
+   "sizeLimit" : {
+      "enable": true,
+      "max" : 1048576
+   }
+
+
+``max (기본: 1048576 bytes)`` 설정을 통해 상품기술서 엔진에서 처리가능한 최대 크기를 제한한다. 
+설정된 크기 이상이라면 처리하지 않고 원본을 응답한다.
+
+
+.. _engine-prditem-mixed-options-data-src:
+
+data-src 속성
+---------------------
+
+lazy-loading 방식에 활용되는 data-src 속성의 리소스를 처리대상으로 지정한다. ::
+
+   # m2.mixed.options
+
+   "images" : {
+      "data-src" : false
+   }
+
+
+다음은 동작 예제이다. ::
+
+   // 원본
+   <img data-src="http://foo.com/1.jpg">
+
+   // "data-src" : false 
+   <img data-src="http://foo.com/1.jpg">
+
+   // "data-src" : true
+   <img data-src="https://example.com/.../m2x/mixed/resource/http://foo.com/1.jpg">
+
+
+
+.. _engine-prditem-mixed-options-dataUri:
+
+Data URI
+---------------------
+
+``<img>`` 태그는 ``src`` 속성으로 ``base64`` 형식으로 변환된 `이미지 <https://jsfiddle.net/casiano/Xadvz/>`_ 를 지원한다. ::
+
+   <img src="data:image/gif;base64,R0lGODlhPQBEAPe ...">
+
+
+리소스 트래픽을 처리할 때 해당 이미지를 처리할 수 있다. ::
+
+   # m2.mixed.options
+
+   "images" : {
+      "dataUri" : false
+   }
+
+
+``"dataUri" : true`` 설정이라면 다음과 같이 동작한다. ::
+
+   // 원본
+   <img src="data:image/gif;base64,R0lGODlhPQBEAPe ...">
+
+   // base64 이미지 대신 리소스 트래픽 링크가 포함삽입된다.
+   <img src="https://example.com/.../m2x/mixed/resource/R0lGODlhPQBEAP....">
+
+
+
+.. _engine-prditem-mixed-options-enc:
+
+원본주소 암호화
+---------------------
+
+상품기술서 엔진은 구분자 뒤에 원본주소를 포함한다. 
+파생(리바운드, 리소스) 트래픽의 경우 다음과 같다. ::
+
+   https://example.com/products/100/m2x/mixed/rebound/http://foo.com/embed/1000
+   https://example.com/products/100/m2x/mixed/resource/http://foo.com/1.jpg
+
+
+연결되는 원본 주소를 숨기고 싶다면 암호화를 사용한다. ::
+
+   # m2.mixed.options
+
+   "encrpytSrcUrl" : {
+      "enable" : false,
+      "algorithm" : "aes-128-cbc",
+      "key" : "0123456789abcdef",
+      "iv" : null
+   }
+
+
+위 설정에서 ``"enable" : true`` 라면 다음과 같이 소스 URL 영역이 암호화된다. ::
+
+   https://example.com/products/100/m2x/mixed/rebound/DsTmmNcO3SGY2LmBzTrTwqK2UtK42bjaHDnqcWwOK1s=
+   https://example.com/products/100/m2x/mixed/resource/h0p3XqkSt3RK0oEg86+hMgeZDeBEf3DBpUKLBhJ6Tiw=
+
+
+.. warning::
+
+   실행 중 이 설정을 변경하는 것은 매우 위험하다.
+   ``plain text`` 로 배포된 URL과 ``cipher text`` 를 기대하는 현재 설정이 호환되지 않기 때문이다. 
+   그 반대로 같다.
+
+
+
+.. _engine-prditem-mixed-options-etc:
+
+기타
+---------------------
+
+::
+
+   # m2.mixed.options
+
+      "escapeJson" : {
+         "enable": true
+      }      
+   }
+
+
+- ``escapeJson`` JSON에 포함된 상품기술서 ``<HTML>`` 의 escape 문자를 치환한다.
+
+   -  ``enable``
+      
+      -  ``true (기본)`` 치환한다.
+
+      -  ``false`` 치환하지 않는다.
+
+
+
+
 .. _engine-prditem-mixed-contents:
 
 Mixed Contents - SSL Onloading
@@ -527,81 +738,6 @@ Mixed Contents 엔진의 목적은 최소한의 ``URL`` 에 대해 SSL Onloading
 *  ``White List`` 등록된 도메인은 ``https://`` 프로토콜만 명시한다.
 *  ``SVL (SSL/TLS Validation List)`` `m2live 서비스 <https://svl.m2live.co.kr>`_ 데이터베이스를 참조한다.
 *  ``Syntax`` HTML 문법만으로 판단한다.
-
-
-상품기술서 SSL Onloading 처리에 앞서 대상을 지정한다. ::
-
-   # m2.mixed
-
-   "options" : {
-      "anchor" : {
-         "enable": false
-      },
-      "schemeless" : {
-         "enable": false,
-         "originProtocol" : "http"
-      },
-      "escapeJson" : {
-         "enable": true
-      }
-   }
-
-
--  ``options`` 태그내에서 특별하게 다루어야 하는 요소들에 대한 동작방식을 설정한다.
-
-   -  ``anchor`` 앵커태그 ``<a href="http://...">`` 에 대한 처리정책을 설정한다.
-
-      -  ``enable``
-
-         -  ``false (기본)`` 수정하지 않는다.
-
-         -  ``true`` Mixed Contents 정책에 따라 https로 업그레이드만 진행하며 proxying 하지 않는다. ::
-         
-               // AS-IS
-               <a href="http://foo.com/index.html">
-
-               // TO-BE
-               <a href="https://foo.com/index.html">
-
-
-
-   -  ``schemeless`` scheme이 생략된 URL에  대한 동작방식을 설정한다.
-
-      -  ``enable``
-
-         -  ``false (기본)`` 수정하지 않는다.
-
-         -  ``true`` 상품기술서내의 다른 리소스와 동일하게 처리한다. scheme을 명확히 지정한다. ::
-
-               // AS-IS
-               <script src="//foo.com/common.js">
-
-               // TO-BE
-               <script src="https://foo.com/common.js">
-
-
-      -  ``originProtocol`` SSL onloading을 해야하는 경우 원본 프로토콜을 설정한다. ::
-
-               <script src="//foo.com/common.js">
-
-
-         -  ``http (기본)`` http 프로토콜을 사용한다. ::
-
-               <script src=".../m2x/mixed/resource/http://foo.com/common.js">
-
-
-         -  ``https`` https 프로토콜을 사용한다. ::
-
-               <script src=".../m2x/mixed/resource/https://foo.com/common.js">
-
-
-   - ``escapeJson`` JSON에 포함된 상품기술서 ``<HTML>`` 의 escape 문자를 치환한다.
-
-      -  ``enable``
-         
-         -  ``true (기본)`` 치환한다.
-
-         -  ``false`` 치환하지 않는다.
 
 
 
@@ -1074,99 +1210,6 @@ M2는 서비스 품질을 개선하기 위해 상품기술서 내 이미지를 �
 
 개발 중 ``dev``
 ====================================
-
-data-src 속성 지원
----------------------
-
-lazy-loading 방식에 활용되는 data-src 속성의 리소스를 처리대상으로 지정한다. ::
-
-   # m2.mixed
-
-   "options" : {
-      "images" : {
-         "data-src" : false
-      }
-   }
-
-
-다음은 동작 예제이다. ::
-
-   // 원본
-   <img data-src="http://foo.com/1.jpg">
-
-   // "data-src" : false 
-   <img data-src="http://foo.com/1.jpg">
-
-   // "data-src" : true
-   <img data-src="https://example.com/.../m2x/mixed/resource/http://foo.com/1.jpg">
-
-
-
-base64 이미지 지원
----------------------
-
-``<img>`` 태그는 ``src`` 속성으로 ``base64`` 형식으로 변환된 `이미지 <https://jsfiddle.net/casiano/Xadvz/>`_ 를 지원한다. ::
-
-   <img src="data:image/gif;base64,R0lGODlhPQBEAPe ...">
-
-
-리소스 트래픽을 처리할 때 해당 이미지를 처리할 수 있다. ::
-
-   # m2.mixed
-
-   "options" : {
-      "images" : {
-         "base64" : false
-      }
-   }
-
-
-``"base64" : true`` 설정이라면 다음과 같이 동작한다. ::
-
-   // 원본
-   <img src="data:image/gif;base64,R0lGODlhPQBEAPe ...">
-
-   // base64 이미지 대신 리소스 트래픽 링크가 포함삽입된다.
-   <img src="https://example.com/.../m2x/mixed/resource/@3378">
-
-
-
-원본주소 암호화
----------------------
-
-상품기술서 엔진은 구분자 뒤에 원본주소를 포함한다. 
-파생(리바운드, 리소스) 트래픽의 경우 다음과 같다. ::
-
-   https://example.com/products/100/m2x/mixed/rebound/http://foo.com/embed/1000
-   https://example.com/products/100/m2x/mixed/resource/http://foo.com/1.jpg
-
-
-연결되는 원본 주소를 숨기고 싶다면 암호화를 사용한다. ::
-
-   # m2.mixed
-
-   "options" : {
-      "encrpytSrcUrl" : {
-         "enable" : false,
-         "algorithm" : "aes-128-cbc",
-         "key" : "0123456789abcdef",
-         "iv" : null
-      }
-   }
-
-
-위 설정에서 ``"enable" : true`` 라면 다음과 같이 소스 URL 영역이 암호화된다. ::
-
-   https://example.com/products/100/m2x/mixed/rebound/DsTmmNcO3SGY2LmBzTrTwqK2UtK42bjaHDnqcWwOK1s=
-   https://example.com/products/100/m2x/mixed/resource/h0p3XqkSt3RK0oEg86+hMgeZDeBEf3DBpUKLBhJ6Tiw=
-
-
-.. warning::
-
-   실행 중 이 설정을 변경하는 것은 매우 위험하다.
-   ``plain text`` 로 배포된 URL과 ``cipher text`` 를 기대하는 현재 설정이 호환되지 않기 때문이다. 
-   그 반대로 같다.
-
 
 
 네이티브 앱 지원 API
