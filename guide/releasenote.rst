@@ -7,6 +7,20 @@ Appendix A: 릴리스 노트
 v21.x
 ====================================
 
+.. _release-21-05-1:
+
+
+21.05.1 (2021.05.28)
+----------------------------
+
+-  :ref:`engine-prditem-mixed-options-sizeLimit` 기능 추가
+-  상품기술서 엔진 :ref:`engine-prditem-edit-prereplacesource` 기능 추가
+
+**버그수정**
+
+-  상품기술서 엔진 - ``<input type="image" src="...">`` 미처리 증상 수정
+
+
 .. _release-21-05-0:
 
 

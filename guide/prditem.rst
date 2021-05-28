@@ -521,12 +521,18 @@ SSL onloading을 해야하는 경우 ``originProtocol (기본: http)`` 설정으
 
    "sizeLimit" : {
       "enable": true,
-      "max" : 1048576
+      "max" : 1048576,
+      "timing": "download"
    }
 
 
-``max (기본: 1048576 bytes)`` 설정을 통해 상품기술서 엔진에서 처리가능한 최대 크기를 제한한다. 
+``max (기본: 1048576 bytes)`` 설정을 통해 상품기술서 엔진에서 처리가능한 최대 크기를 제한한다.
 설정된 크기 이상이라면 처리하지 않고 원본을 응답한다.
+
+-  ``timing``
+
+      -  ``download (기본)`` 다운로드 완료 후 용량을 검사한다.
+      -  ``preprocess`` 상품기술서 전처리 ``m2.mixed.edit`` 수행 후 용량을 검사한다.
 
 
 .. _engine-prditem-mixed-options-data-src:
@@ -1074,122 +1080,11 @@ M2는 서비스 품질을 개선하기 위해 상품기술서 내 이미지를 �
 
 
 
-.. _engine-prditem-screenshot:
-
-스크린샷 ``dev``
-====================================
-
-스크린샷은 상품기술서 안의 리소스를 이미지로 렌더링하여 제공한다. 
-
-.. note::
-
-   상품기술서 ``<HTML>`` 을 ``JPG`` 로 변환하는 것이 아니다. 
-   상품기술서 ``<HTML>`` 은 유지하며 내부 리소스를 ``JPG`` 로 바꾸는 것이다.
-
-이미지로 렌더링된 리소스는 리소스 트래픽으로 제공된다. ::
-
-   https://example.com/products/100/m2x/mixed/screenshot
-   
-   https://example.com/products/100/m2x/mixed/screenshot/split/400
-
-   https://example.com/products/100/m2x/mixed/screenshot/split/400/optimize
-
-
-단순히 상품기술서 페이지를 이미지로 렌더링하는 것이 아닌 다음 요소들이 연동된다.
-
--  YouTube 및 <iframe> 태그 인식
--  Animated GIF 인식
--  동적 Width
--  이미지 분할 및 최적화
-
-::
-
-   # /usr/local/m2/config-production.json
-
-   {
-      "m2": {
-         "mixed" : {
-            "screenshot" : {
-               "mode" : "{ optimize | exclude-images | minimum | single }",
-            }
-         }
-      }
-   }
-
-
--  ``screenshot``
-
-   -  ``optimize (기본)`` 태그를 기준으로영역을 분할하여 이미지로 생성한다.
-
-   -  ``exclude-images`` 이미지는 URL 그대로 유지하며, 텍스트 요소만 이미지로 생성한다.
-   
-   -  ``minimum`` 동적 리소스(<iframe>, Animated GIF)를 제외하고 이미지로 생성한다.
-   
-   -  ``single`` 화면 그대로 캡쳐한다.
-   
-
-.. note::
-
-   ``JPG`` 포맷의 가로, 세로 최대 길이는 65,535 pixel이다.
-   따라서 ``single`` 로 생성하는 경우 스크린샷이 실패할 수 있다.
-
-
-
-.. _engine-prditem-developing:
-
-개발 중 ``dev``
-====================================
-
-
-네이티브 앱 지원 API
----------------------
-
-상품기술서를 네이티브 앱이 로딩할 수 있도록 ``JSON`` API를 제공한다. ::
-
-   {
-      "resources" : [
-         {
-            "type": "image",
-            "type": "https://example.com/products/100/m2x/mixed/render/@434-1233",
-         },
-         {
-            "type": "image",
-            "type": "https://foo.com/image/67/01/67018014_161423634296_0.jpg",
-         },
-         {
-            "type": "html",
-            "type": "<iframe id=\"prdDetailIfr\" name=\"prdDetailIfr\" src=\"\/prd\/desc?id=100\" scrolling=\"no\" frameborder=\"0\" width=\"720\" height=\"0\"><\/iframe>",
-         },
-         {
-            "type": "image",
-            "type": "https://bar.com/image/67/01/67018014_161423634296_1.jpg",
-         }
-      ]
-   }
-
-네이티브 앱은 각 리소스를 순차적으로 로딩(+줄바꿈)하면 브라우저를 통해 상품기술서를 보는 것과 동일한 효과를 얻을 수 있다.
-지원하는 ``type`` 은 다음과 같다.
-
--  ``image`` JPG, PNG 등의 이미지 URL
--  ``html`` <iframe> 처럼 웹뷰를 통해서만 렌더링이 가능한 링크
-
-
-개발 요건은 다음과 같다.
-
-   -  상품기술서 ``<HTML>`` 을 ``JSON`` 형식으로 응답 (이하 ``<기술서-API>`` )
-   -  API는 ``css`` , ``js`` 등 비시각적인 요소는 모두 제거한다.
-   -  네이티브 앱은 ``<기술서-API>`` 에 기록된 순서대로 로딩하여 상품기술서에 대한 통합된 서비스가 가능하다.
-   -  동적 요소(YouTube, ``<iframe>`` , ``gif`` ) 등은 국지적으로 웹뷰로 로딩할 수 있도록 태그를 제공한다.
-   -  하이퍼링크 ``<a>`` , ``<map>`` 요소들은 제거한다.
-   -  링크되거나 렌더링되는 모든 이미지에 대한 분할, 최적화가 가능하다.
-   -  `data-src 속성 지원`_ , `base64 이미지 지원`_ , `원본주소 암호화`_ 를 모두 지원한다.
-   
-
 
 
 .. _engine-prditem-edit:
 
-상품기술서 수정 ``dev``
+상품기술서 수정
 ====================================
 
 상품기술서 중 문자열을 치환하거나 유해 태그등을 삭제한다. ::
@@ -1341,3 +1236,115 @@ M2는 서비스 품질을 개선하기 위해 상품기술서 내 이미지를 �
    
    // 여러 조건이 동시에 발생하면 & 로 구분한다.
    xu=foo.com,bar.com&xd=baz.com&xp=182.162.143.217,qux.com
+
+
+   .. _engine-prditem-developing:
+
+개발 중 ``dev``
+====================================
+
+.. _engine-prditem-native:
+
+네이티브 앱 지원 API ``dev``
+---------------------
+
+상품기술서를 네이티브 앱이 로딩할 수 있도록 ``JSON`` API를 제공한다. ::
+
+   {
+      "resources" : [
+         {
+            "type": "image",
+            "type": "https://example.com/products/100/m2x/mixed/render/@434-1233",
+         },
+         {
+            "type": "image",
+            "type": "https://foo.com/image/67/01/67018014_161423634296_0.jpg",
+         },
+         {
+            "type": "html",
+            "type": "<iframe id=\"prdDetailIfr\" name=\"prdDetailIfr\" src=\"\/prd\/desc?id=100\" scrolling=\"no\" frameborder=\"0\" width=\"720\" height=\"0\"><\/iframe>",
+         },
+         {
+            "type": "image",
+            "type": "https://bar.com/image/67/01/67018014_161423634296_1.jpg",
+         }
+      ]
+   }
+
+네이티브 앱은 각 리소스를 순차적으로 로딩(+줄바꿈)하면 브라우저를 통해 상품기술서를 보는 것과 동일한 효과를 얻을 수 있다.
+지원하는 ``type`` 은 다음과 같다.
+
+-  ``image`` JPG, PNG 등의 이미지 URL
+-  ``html`` <iframe> 처럼 웹뷰를 통해서만 렌더링이 가능한 링크
+
+
+개발 요건은 다음과 같다.
+
+   -  상품기술서 ``<HTML>`` 을 ``JSON`` 형식으로 응답 (이하 ``<기술서-API>`` )
+   -  API는 ``css`` , ``js`` 등 비시각적인 요소는 모두 제거한다.
+   -  네이티브 앱은 ``<기술서-API>`` 에 기록된 순서대로 로딩하여 상품기술서에 대한 통합된 서비스가 가능하다.
+   -  동적 요소(YouTube, ``<iframe>`` , ``gif`` ) 등은 국지적으로 웹뷰로 로딩할 수 있도록 태그를 제공한다.
+   -  하이퍼링크 ``<a>`` , ``<map>`` 요소들은 제거한다.
+   -  링크되거나 렌더링되는 모든 이미지에 대한 분할, 최적화가 가능하다.
+   -  `data-src 속성 지원`_ , `base64 이미지 지원`_ , `원본주소 암호화`_ 를 모두 지원한다.
+   
+
+.. _engine-prditem-screenshot:
+
+스크린샷 ``dev``
+---------------------
+
+스크린샷은 상품기술서 안의 리소스를 이미지로 렌더링하여 제공한다. 
+
+.. note::
+
+   상품기술서 ``<HTML>`` 을 ``JPG`` 로 변환하는 것이 아니다. 
+   상품기술서 ``<HTML>`` 은 유지하며 내부 리소스를 ``JPG`` 로 바꾸는 것이다.
+
+이미지로 렌더링된 리소스는 리소스 트래픽으로 제공된다. ::
+
+   https://example.com/products/100/m2x/mixed/screenshot
+   
+   https://example.com/products/100/m2x/mixed/screenshot/split/400
+
+   https://example.com/products/100/m2x/mixed/screenshot/split/400/optimize
+
+
+단순히 상품기술서 페이지를 이미지로 렌더링하는 것이 아닌 다음 요소들이 연동된다.
+
+-  YouTube 및 <iframe> 태그 인식
+-  Animated GIF 인식
+-  동적 Width
+-  이미지 분할 및 최적화
+
+::
+
+   # /usr/local/m2/config-production.json
+
+   {
+      "m2": {
+         "mixed" : {
+            "screenshot" : {
+               "mode" : "{ optimize | exclude-images | minimum | single }",
+            }
+         }
+      }
+   }
+
+
+-  ``screenshot``
+
+   -  ``optimize (기본)`` 태그를 기준으로영역을 분할하여 이미지로 생성한다.
+
+   -  ``exclude-images`` 이미지는 URL 그대로 유지하며, 텍스트 요소만 이미지로 생성한다.
+   
+   -  ``minimum`` 동적 리소스(<iframe>, Animated GIF)를 제외하고 이미지로 생성한다.
+   
+   -  ``single`` 화면 그대로 캡쳐한다.
+   
+
+.. note::
+
+   ``JPG`` 포맷의 가로, 세로 최대 길이는 65,535 pixel이다.
+   따라서 ``single`` 로 생성하는 경우 스크린샷이 실패할 수 있다.
+
