@@ -1,6 +1,6 @@
 .. _hooking:
 
-Appendix C: Hooking 함수
+Appendix B: Hooking 함수
 ***********************
 
 M2 후킹(Hooking) 함수를 이용하면 자유롭게 HTTP 트랜잭션을 제어할 수 있다. 

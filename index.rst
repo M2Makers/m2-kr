@@ -54,5 +54,4 @@ M2 완벽 가이드
    :maxdepth: 2
 
    guide/releasenote.rst
-   guide/nunjucks.rst
    guide/hooking.rst
