@@ -520,7 +520,7 @@ M2는 서비스 품질을 개선하기 위해 상품기술서 내 이미지를 �
    }
 
 
-``enable(기본: false)`` 설정이 ``true`` 라면 Mixed Contents 정책에 따라 ``https``로 업그레이드만 진행하며 proxying 하지 않는다. ::
+``enable(기본: false)`` 설정이 ``true`` 라면 Mixed Contents 정책에 따라 ``https`` 로 업그레이드만 진행하며 proxying 하지 않는다. ::
 
    // AS-IS
    <a href="http://foo.com/index.html">
@@ -558,14 +558,14 @@ SSL onloading을 해야하는 경우 ``originProtocol (기본: http)`` 설정으
    <script src="//foo.com/common.js">
 
 
-   -  ``http (기본)`` http 프로토콜을 사용한다. ::
+-  ``http (기본)`` http 프로토콜을 사용한다. ::
 
-         <script src=".../m2x/mixed/resource/http://foo.com/common.js">
+      <script src=".../m2x/mixed/resource/http://foo.com/common.js">
 
 
-   -  ``https`` https 프로토콜을 사용한다. ::
+-  ``https`` https 프로토콜을 사용한다. ::
 
-         <script src=".../m2x/mixed/resource/https://foo.com/common.js">
+      <script src=".../m2x/mixed/resource/https://foo.com/common.js">
 
 
 
@@ -1310,7 +1310,7 @@ M2와 ``https://svl.m2live.co.kr`` 의 통신이 가능해야 정상동작한다
    -  동적 요소(YouTube, ``<iframe>`` , ``gif`` ) 등은 국지적으로 웹뷰로 로딩할 수 있도록 태그를 제공한다.
    -  하이퍼링크 ``<a>`` , ``<map>`` 요소들은 제거한다.
    -  링크되거나 렌더링되는 모든 이미지에 대한 분할, 최적화가 가능하다.
-   -  `data-src 속성 지원`_ , `base64 이미지 지원`_ , `원본주소 암호화`_ 를 모두 지원한다.
+   -  `data-src 속성`_ , `Data URI`_ , `원본주소 암호화`_ 를 모두 지원한다.
    
 
 .. _engine-prditem-screenshot:
