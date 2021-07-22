@@ -82,10 +82,11 @@ M2 후킹(Hooking) 함수를 이용하면 자유롭게 HTTP 트랜잭션을 제�
 
 -  ``message`` 클라이언트 요청의 HTTP 메시지
 
--  ``body`` 클라이언트 POST 요청의 HTTP Body. POST가 아니라면 해당 필드 없음
+-  ``body`` 클라이언트 POST 요청의 HTTP Body. POST 요청이 아니라면 해당 필드가 없거나 값이 ``null`` .
 
 
 개발 호환성을 위해 요청 헤더에 ``Content-Type: application/json`` 를 명시한다.
+
 
 
 .. _hooking-error:
@@ -108,7 +109,7 @@ M2-Core가 ``200 OK`` 를 보내지 않는다면 ``510 Not Extended`` 응답과 
 -  ``body`` M2-Core가 보낸 Body
 
 
-.. _hooking-continue:
+.. _hooking-overwrite:
 
 요청 재정의
 ====================================
@@ -150,3 +151,154 @@ Hooking 함수의 응답에 클라이언트 HTTP 요청을 재정의한다. ::
 -  ``vhost`` 변경될 가상호스트. 이 값이 NULL 또는 빈문자열 이라면 가상호스트를 변경하지 않는다.
 
 -  ``originRequest`` 원본에 요청해야 하는 경우 HTTP 요청 구조체
+
+
+.. note::
+
+   요청을 재정의하지 않고 바이패스 시키고 싶다면 다음과 같이 응답한다. ::
+
+      {
+         "sessionId": 2,
+         "response": {
+            "code": 100
+         },
+         "cacheKey": null
+      }
+
+
+   -  ``response.code`` 를 ``100`` 으로 설정하여 요청을 진행시킨다.
+   -  ``cacheKey`` 를 ``null`` 로 설정하여 캐싱엔진을 우회시키도록 한다. 
+
+
+
+.. _hooking-overwrite-post:
+
+POST 요청 상세
+-----------------------------------------------
+
+POST 요청을 Hooking 하려면 다음 설정이 선행되어야 한다. ::
+
+   # server.xml - <Server><VHostDefault><Options>
+   # vhosts.xml - <Vhosts><Vhost><Options>
+
+   <BypassPostRequest>ON</BypassPostRequest>
+   <PostRequest MaxContentLength="102400" BodySensitive="ON">ON</PostRequest>
+
+
+-  바이패스하는 POST요청이라면 Hooking을 통한 재정의는 불필요하다.
+-  Hooking 모듈을 동작시키려면 POST요청을 캐싱해야 한다.
+
+
+캐싱엔진은 POST 요청에 대해 URL과 Body의 조합으로 캐싱키를 생성한다.
+Hooking 모듈에 의해 요청이 재정의될 경우 다음과 같은 규칙을 따른다.
+
+-  캐싱키는 Hooking 응답의 ``cacheKey`` 만을 사용한다. 클라이언트 POST 요청의 URL 및 Body는 무시된다.
+-  캐싱엔진이 원본에 요청을 보낼 때는 Hooking 응답의 ``originRequest`` 만을 사용한다. 캐싱키 및 클라이언트 요청은 모두 무시된다.
+
+
+정리하면 Hooking 모듈은 요청을 완전히 재정의하는 개념이기 때문에 POST 요청은 Hooking 모듈로 전달되기 전까지만 의미를 가진다고 볼 수 있다.
+
+
+
+.. _hooking-smartapi:
+
+Smart API
+====================================
+
+Hooking 함수를 이용해 Smart API 모듈을 구현한다. 
+Smart API 모듈은 서비스 중단없이 교체가 가능하며 테스트 환경을 제공한다.
+
+
+.. _hooking-smartapi-scheme:
+
+모듈 규격
+-----------------------------------------------
+
+``hook1.js`` 모듈은 버전, 설정, 로직 3부분으로 나뉜다. ::
+
+   /* 버전 = v10
+      v10 - 유니코드 대응
+      v9 - 캐싱키 변경
+      ...
+   */
+   var _Ver = 10;
+
+   // 설정 + 주석
+   var includeMethodTag = false; // <Method> 태그를 [true=포함 | false=미포함] 한다.
+   var maxItemCount = 64; // 최대 아이템 개수
+
+   // 비지니스 로직
+   // 고객 요구사항을 구현한다.
+
+
+.. note::
+
+   대부분의 모듈은 M2 개발팀과 고객의 협의에 의해 개발되지만 스펙 및 소스는 모두 오픈되어 운영된다.
+
+
+
+.. _hooking-smartapi-staging:
+
+검수/배포 시나리오
+-----------------------------------------------
+
+1. ``고객`` 동작하는 프로덕션 환경을 가지고 있다. 히트율 상승 및 호환성 확보를 위해 기술지원 담당자에게 수정을 요청한다.
+
+2. ``M2`` 새 버전의 모듈을 개발 & 검수 한다. 고객에게는 항상 ``hook1.stage.js`` 로 전달된다.
+
+3. ``고객`` ``hook1.stage.js`` 을 ``/usr/local/ston/svc/{가상호스트}/`` 경로에 배포한다. 반드시 설정을 Reload해야 모듈이 로딩된다.
+
+4. ``고객`` 쿼리스트링 ``_m2.hook=stage`` 를 붙여 ``hook1.stage.js`` 모듈을 테스트한다. ::
+
+      http://example.com/store/inventory?id=10&_m2.hook=stage
+
+
+5. ``고객`` 다양한 호출을 통해 의도에 맞게 모듈이 동작하는지 검수한다. ::
+
+      {
+         "meta": {
+            "ver": 10
+         },  
+         "request": {
+            "url": "http://127.0.0.1/availity",
+            "method": "POST",
+            "headers": {
+               "host": "baq.com",
+               "cookie": "NNB=LS3KUV63E5RV6; NRTK=ag#all_gr#1_ma#-2_si#0_en#0_sp#0;"
+            },
+            "body": "<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\">\r\n  <s:Body>\r\n    <serviceCall xmlns=\"http://webservice.B2BOnline.com\">\r\n      <AvailRQ>\r\n        <AgencyId>JJSEL13157</AgencyId>\r\n        <CarrierCode>7C</CarrierCode>\r\n        <DepApoCode>CJU</DepApoCode>\r\n        <DepApoName></DepApoName>\r\n        <ArrApoCode>PUS</ArrApoCode>\r\n        <ArrApoName></ArrApoName>\r\n        <FlightDate>20171228</FlightDate>\r\n        <PaxCount>1</PaxCount>\r\n      </AvailRQ>\r\n    </serviceCall>\r\n  </s:Body>\r\n</s:Envelope>"
+         },
+         "hooking": {
+            "sessionId": 2,
+            "response": {
+               "code": 200
+            },
+            "cacheKey": "/availity?key={a,b,1}",
+            "vhost": "bar.com",
+            "originRequest": {
+               "method": "POST",
+               "url": "/itemimage/LO/12/37/50/02/80/vdo/LO1237500280_1.mpx3123",
+               "headers": [
+                  { "key": "host", "value": "baq.com" },
+                  { "key": "x-custom-header", "value": "abcdefg" },
+                  { "key": "x-custom-header2", "value": "baq.com" },
+                  { "key": "cookie", "value": "NNB=LS3KUV63E5RV6; NRTK=ag#all_gr#1_ma#-2_si#0_en#0_sp#0;" }
+               ],
+               "body": "<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\">\r\n  <s:Body>\r\n    <serviceCall xmlns=\"http://webservice.B2BOnline.com\">\r\n      <AvailRQ>\r\n        <AgencyId>JJSEL13157</AgencyId>\r\n        <CarrierCode>7C</CarrierCode>\r\n        <DepApoCode>CJU</DepApoCode>\r\n        <DepApoName></DepApoName>\r\n        <ArrApoCode>PUS</ArrApoCode>\r\n        <ArrApoName></ArrApoName>\r\n        <FlightDate>20171228</FlightDate>\r\n        <PaxCount>1</PaxCount>\r\n      </AvailRQ>\r\n    </serviceCall>\r\n  </s:Body>\r\n</s:Envelope>"
+            }
+         }  
+      }
+
+   
+   -  (문자 그대로) 서로 다른 요청이지만 같은 ``cacheKey`` 를 가지도록 구현되었는지 검수한다.
+
+   -  ``originRequest`` 를 통해 원본서버에 보내지는 요청이 바른지 검수한다.
+
+   
+   .. note::
+
+      ``reponse.code`` 의 값은 항상 ``200`` 인데 이는 테스트 요청은 캐싱엔진이나 원본서버와 통신하지 않고 즉시 응답됨을 의미한다.
+
+   
+6. ``M2/고객`` 검수가 완료된 ``hook1.stage.js`` 를 ``hook1.js`` 으로 변경하고 설정을 Reload한다. 
+   롤백상황을 고려하여 구 버전의 ``hook1.js`` 는 ``hook1.v9.js`` 처럼 버저닝을 통해 남겨준다.
