@@ -42,6 +42,7 @@ M2 후킹(Hooking) 함수를 이용하면 자유롭게 HTTP 트랜잭션을 제�
       <OriginOptions>
          <ConnectTimeout>3</ConnectTimeout>
          <ReceiveTimeout>3</ReceiveTimeout>
+         <ReuseTimeout>60</ReuseTimeout>
       </OriginOptions>
       <Log Dir="/cache_log">
          <Origin Type="time" Unit="1440" Retention="10">ON</Origin>

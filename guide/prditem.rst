@@ -516,17 +516,34 @@ M2는 서비스 품질을 개선하기 위해 상품기술서 내 이미지를 �
    # m2.mixed.options
 
    "anchor" : {
-      "enable": false
+      "enable": false,
+      "mixed": false,
+      "enableLink": true
    }
 
 
-``enable(기본: false)`` 설정이 ``true`` 라면 Mixed Contents 정책에 따라 ``https`` 로 업그레이드만 진행하며 proxying 하지 않는다. ::
+.. note::
+
+   ``enable(기본: false)`` 설정이 ``true`` 인 경우에만 앵커태그를 처리한다.
+
+
+``mixed(기본: false)`` 가 ``true`` 라면 Mixed Contents 정책에 따라 ``https`` 로 업그레이드만 진행하며 proxying 하지 않는다. ::
 
    // AS-IS
-   <a href="http://foo.com/index.html">
+   <a href="http://foo.com/index.html">link</a>
 
    // TO-BE
-   <a href="https://foo.com/index.html">
+   <a href="https://foo.com/index.html">link</a>
+
+
+
+``enableLink(기본: true)`` 가 ``false`` 라면 ``href`` 속성을 제거한다.  ::
+
+   // AS-IS
+   <a href="http://foo.com/index.html">link</a>
+
+   // TO-BE
+   <a>link</a>
 
 
 
@@ -1225,9 +1242,142 @@ M2와 ``https://svl.m2live.co.kr`` 의 통신이 가능해야 정상동작한다
 따라서 기본 설정은 `deprecated <https://www.tutorialspoint.com/html/html_deprecated_tags.htm>`_ , `obsolete <https://www.w3.org/TR/html52/obsolete.html#non-conforming-features>`_ 에서 언급된 목록들을 포함하여 배포되지만, 임의의 태그를 추가하여도 동작한다.
 
 
-.. note:
+.. note::
 
    `W3C - Obsolete features <https://www.w3.org/TR/html52/obsolete.html#obsolete>`_ 는 꾸준히 제안되고 있으며, M2는 ``HTML 5.2`` 제안을 따른다.
+
+
+
+.. _engine-prditem-edit-refontrol:
+
+참조 소스 제어 ``dev``
+---------------------
+
+상품기술서 등 ``HTML`` 본문에서 참조되는 임의의 리소스가 허가된 도메인이 아닐 경우(또는 해당할 경우) 참조되지 않도록 상품기술서를 변경한다 ::
+
+   # m2.mixed
+
+   "edit" : {
+      "refControl" : {
+         "enabe" : false,
+         "mode" : "whitelist",
+         "domains" : [ ],
+         "tags" : [
+            {
+               "name" : "iframe",
+               "attr" : "src",
+               "action" : "removeTag"
+            }
+         ]
+      },
+   }
+
+
+-  ``refControl`` 참조되는 리소스(i.e ``src`` 또는 ``href`` 등) 에 대해 ``domains`` 필드에 기반하여 리소스 참조 정책을 수정한다.
+
+   -  ``enable (기본: false)`` 활성화 설정. ``true`` 인 경우에만 참조 소스를 제어한다.
+
+   -  ``mode`` 도메인 목록 ``domain`` 사용 정책
+
+      -  ``whitelist (기본)`` 도메인 목록에 존재하지 않는 리소스 참조만 허용한다. 다시 말해 존재하지 않는다면 수정한다.
+
+      -  ``blacklist`` 도메인 목록에 존재하는 리소스만 수정한다.
+
+   -  ``domains`` 대상 도메인 목록. 문자열 배열이다.
+
+   -  ``tags`` 수정대상 태그와 속성, 정책 세트를 구성한다.
+
+      -  ``name`` 태그 명칭
+
+      -  ``attr`` 태그가 리소스를 참조하는 속성. 예를 들어 ``<iframe>`` 의 경우 ``src`` 속성이며, ``<a>`` 의 경우 ``href`` 이다.
+
+      -  ``action`` 수정 정책. 다음 값 중 하나를 가진다.
+
+         -  ``removeTag (기본)`` 해당 태그를 삭제한다.
+
+         -  ``removeAttr`` 해당 속성을 삭제한다.
+
+         -  ``replaceAttr`` 속성명을 변경한다. 값은 그대로 유지된다.
+
+         -  ``insertAttr`` 추가 속성을 삽입한다.
+
+
+다음과 같이 ``HTML`` 내 알 수 없는 리소스를 ``<iframe>`` 으로 참조하는 경우 이를 제어하는 방법에 대해 설명한다. ::
+
+   <p>foo bar</p>
+   <iframe width="560" height="315" src="https://foo.com/embed/xW95ui6xDNM" title="Unknown video player" allowfullscreen></iframe>
+   <hr>
+
+
+다음은 YouTube를 제외한 어떠한 ``<iframe>`` 참조도 허용하지 않는 설정이다. ::
+
+   # m2.mixed
+
+   "edit" : {
+      "refControl" : {
+         "enabe" : true,
+         "mode" : "whitelist",
+         "domains" : [ "youtube.com", "www.youtube.com" ],
+         "tags" : [
+            {
+               "name" : "iframe",
+               "attr" : "src",
+               "action" : "removeTag"
+            }
+         ]
+      },
+   }
+
+
+.. note::
+
+   위 설정에서 ``"mode" : "blacklist"`` 으로 설정한다면 YouTube에 대해서만 태그를 수정한다로 의미가 변경된다.
+
+
+``tags.action`` 값에 따라 태그가 수정 정책을 정교하게 구성한다. 
+
+-  ``"action" : "removeTag"`` 해당 태그를 삭제한다. 아래와 같이 ``<iframe>`` 태그가 삭제된다. ::
+
+      <p>foo bar</p>
+      <hr>
+
+
+-  ``"action" : "removeAttr"`` 해당 태그의 속성을 삭제한다. 아래와 같이 ``attr`` 필드의 값으로 설정한 ``src`` 속성이 삭제된다. ::
+
+      <p>foo bar</p>
+      <iframe width="560" height="315" title="Unknown video player" allowfullscreen></iframe>
+      <hr>
+
+-  ``"action" : "replaceAttr"`` 해당 태그의 속성 값을 교체한다. 아래와 같이 ``src`` 속성이 ``alt`` 속성으로 대체되었다. ::
+
+      <p>foo bar</p>
+      <iframe width="560" height="315" alt="https://foo.com/embed/xW95ui6xDNM" title="Unknown video player" allowfullscreen></iframe>
+      <hr>
+
+   대체 속성은 추가적으로 ``replaceAttr`` 필드를 참조한다. ::
+
+      {
+         "name" : "iframe",
+         "attr" : "src",
+         "action" : "replaceAttr",
+         "replaceAttr" : "alt"
+      }
+
+-  ``"action" : "appendAttr"`` 설정된 속성을 추가로 태그에 삽입한다. 아래와 같이 추가속성을 통해 해당 태그가 노출되지 않도록 수정ㅎㄴ다. ::
+
+      <p>foo bar</p>
+      <iframe width="560" height="315" src="https://foo.com/embed/xW95ui6xDNM" style="display:none;" alt="hidden by m2" title="Unknown video player" allowfullscreen></iframe>
+      <hr>
+
+   이를 위해 덧붙여질 ``insertAttr`` 속성을 추가 구성해야 한다. ::
+
+      {
+         "name" : "iframe",
+         "attr" : "src",
+         "action" : "insertAttr",
+         "insertAttr" : "style=\"display:none;\" alt=\"hidden by m2\""
+      }
+
 
 
 
@@ -1371,4 +1521,5 @@ M2와 ``https://svl.m2live.co.kr`` 의 통신이 가능해야 정상동작한다
 
    ``JPG`` 포맷의 가로, 세로 최대 길이는 65,535 pixel이다.
    따라서 ``single`` 로 생성하는 경우 스크린샷이 실패할 수 있다.
+
 
