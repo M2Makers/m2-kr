@@ -990,6 +990,42 @@ URL 형식만 보고 문법적으로 판단한다. ::
 
 
 
+.. _engine-prditem-mixed-contents-targettags:
+
+<태그.속성> 지정
+---------------------
+
+SSL Onloading은 다음 <태그.속성> 목록을 기반으로 동작한다. ::
+
+   # m2.mixed
+
+   "upgradeHttps" : {
+      "targetTags" : [
+         "img.src", 
+         "img.data-src", 
+         "input.src", 
+         "video.src",
+         "source.src",
+         "iframe.src",
+         "link.href",
+         "script.src",
+         "a.href",
+         "embed.src"
+      ]
+   }
+
+
+예를 들어 위 리스트에서 ``video.src`` 를 제거한다면 ``<video src=...>`` <태그.속성>은 무시된다. 
+반대로 커스텀 <태그.속성>이라도 리스트에 추가하여 지원이 가능하다.
+
+
+.. note::
+
+   이 설정은 `Mixed Contents - 처리옵션`_ 보다 우선한다. 
+   따라서 리스트에 ``a.href`` 가 빠져 있다면 `앵커태그`_ 기능은 동작하지 않는다.
+
+
+
 .. _engine-prditem-svl-service:
 
 Mixed Contents - SVL 서비스
