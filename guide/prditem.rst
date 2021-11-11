@@ -299,6 +299,8 @@ Mixed Contents - 트래픽 라우팅
 
 
 
+.. _engine-prditem-mixed-traffic-rebound:
+
 리바운드 트래픽 ``/m2x/mixed/rebound``
 ---------------------
 웹 페이지는 구조적으로 다른 문서를 포함(Embed)할 수 있다. 
@@ -343,6 +345,48 @@ Browser에서 상품기술서가 로딩 된 이후에 발생하는 리바운드 
    따라서 검증된 메인 트래픽 URL인 ``/product/100`` 에 참조 소스를 덧 붙이는 규칙을 사용한다.
 
 
+리바운드 트래픽을 CDN등 별도의 도메인으로 위임할 수 있다. ::
+
+   # m2.mixed
+
+   "traffics" : {
+      "rebound" : {
+         "domain" : "foo.com",
+         "tags" : {
+            "domain" : "bar.com",
+            "targets" : [
+               "script.src",
+               "link.href"
+            ]
+         }
+      }
+   }
+
+
+리바운드 트래픽은 태그 레벨로 조절이 가능한 만큼 우선순위를 명확히 인지해야 한다.
+
+-  ``traffics.rebound.tags.targets`` 에 매칭되는 ``<태그.속성>`` 은 ``traffics.rebound.tags.domain`` 으로 URL이 변경된다. ::
+
+      // AS-IS
+      <link href="http://www.example.com/main.css">
+
+      // TO BE
+      <link href="https://bar.com/products/100/m2x/mixed/rebound/http://www.example.com/main.css">
+
+
+-  ``traffics.rebound.tags.targets`` 에 매칭되지 않는 리바운드 트래픽은 ``traffics.rebound.domain`` 으로 URL이 변경된다. ::
+
+      // AS-IS
+      <iframe href="http://www.another.com/page">
+
+      // TO BE
+      <iframe href="https://foo.com/products/100/m2x/mixed/rebound/http://www.another.com/page">
+
+
+-  ``traffics.rebound`` 설정이 구성되지 않았다면 트래픽이 유입된 가상호스트 이름을 따른다.
+
+
+
 리소스 트래픽 ``/m2x/mixed/resource``
 ---------------------
 
@@ -368,7 +412,7 @@ M2 도입 전 후 트래픽 흐름은 다음과 같이 바뀐다.
    }
 
 
-메인, 리바운드 트래픽은 가상호스트 이름을 따른다. 하지만 리소스의 경우 설정에 따라 변경된다. ::
+다음은 설정에 따른 URL 예시이다. ::
 
    // 메인, 리바운드 트래픽
    https://example.com/products/100/m2x/mixed/main
@@ -508,10 +552,10 @@ M2는 서비스 품질을 개선하기 위해 상품기술서 내 이미지를 �
 .. _engine-prditem-mixed-options-anchor:
 
 
-앵커태그
+<a> 태그
 ---------------------
 
-앵커태그 ``<a href="http://...">`` 에 대한 처리정책을 설정한다. ::
+``<a href="http://...">`` 에 대한 처리정책을 설정한다. ::
 
    # m2.mixed.options
 
@@ -545,6 +589,50 @@ M2는 서비스 품질을 개선하기 위해 상품기술서 내 이미지를 �
    // TO-BE
    <a>link</a>
 
+
+.. _engine-prditem-mixed-options-video:
+
+<video> 태그
+---------------------
+
+``<video src="http://...">`` 에 대한 처리정책을 설정한다. ::
+
+   # m2.mixed.options
+
+   "video" : {
+      "enable": false
+   }
+
+
+-  ``enable (기본: false)`` - ``<video>`` 태그를 처리하지 않는다.
+-  ``enable: true`` - 가능하다면 URL을 ``https`` 로 업그레이드한다.
+
+.. note::
+
+   ``<video>`` 콘텐츠는 용량이 과도할 수 있어 SSL Onloading하지 않는다.
+
+
+.. _engine-prditem-mixed-options-embed:
+
+<embed> 태그
+---------------------
+
+``<embed src="http://...">`` 에 대한 처리정책을 설정한다. ::
+
+   # m2.mixed.options
+
+   "embed" : {
+      "enable": false
+   }
+
+
+-  ``enable (기본: false)`` - ``<embed>`` 태그를 처리하지 않는다.
+-  ``enable: true`` - 가능하다면 URL을 ``https`` 로 업그레이드한다.
+
+.. note::
+
+   ``<embed>`` 콘텐츠는 용량이 과도할 수 있어 SSL Onloading하지 않는다.
+   
 
 
 .. _engine-prditem-mixed-options-schemeless:
@@ -1119,6 +1207,27 @@ M2와 ``https://svl.m2live.co.kr`` 의 통신이 가능해야 정상동작한다
 
 
 
+.. _engine-prditem-postmain:
+
+Mixed Contents - POST API
+====================================
+
+구성된 상품기술서 엔진을 ``POST`` 메소드를 통해 연동할 수 있다. 
+대상 경로는 ``/m2x/mixed/query`` 이다. ::
+
+   POST /m2x/mixed/query HTTP/1.1
+   Host: example.com
+   Content-Type: text/plain
+   Content-Length: 2043
+
+   <html>
+     <body>
+      ...
+     </body>
+   </html>
+
+M2는 Mixed Contents 문제가 처리된 ``HTML`` 을 응답한다.
+
 
 .. _engine-prditem-responsive:
 
@@ -1243,14 +1352,13 @@ M2와 ``https://svl.m2live.co.kr`` 의 통신이 가능해야 정상동작한다
             "font",
             "marquee",
             "menu",
-            "menuitem,
+            "menuitem",
             "multicol",
             "nobr",
             "spacer",
             "tt",
             "rb",
-            "rtc",
-            
+            "rtc"            
          ]
       }
    }
@@ -1282,6 +1390,50 @@ M2와 ``https://svl.m2live.co.kr`` 의 통신이 가능해야 정상동작한다
 .. note::
 
    `W3C - Obsolete features <https://www.w3.org/TR/html52/obsolete.html#obsolete>`_ 는 꾸준히 제안되고 있으며, M2는 ``HTML 5.2`` 제안을 따른다.
+
+
+
+.. _engine-prditem-edit-pinchzoom:
+
+핀치 줌 삽입
+---------------------
+
+M2의 프론트엔드 모듈인 ``m2fe.min.js`` 를 ``<HEAD>`` 영역에 삽입한다. ::
+
+   <!DOCTYPE html>
+   <html lang="en">
+   <head>
+      <script src="/your-path/m2fe.min.js"></script>
+      <script>
+         window.M2OPTION = {};
+      </script>
+   </head>
+   <body>
+      <div id="m2-product-area">
+         <div style="margin-top: 20px;">
+               <strong style="color: rgb(51, 51, 51);">소개합니다</strong>
+         </div>
+
+         <ul style="margin-top: 10px;">
+               <li>- 편안하게 입을 수 있는 남성 폴리 사틴 파자마 상하세트입니다.</li>
+               <li>- 허리 밴딩 처리로 편안하며 허리 조절 스트링으로 사이즈 조절이 가능합니다.</li>
+               <li>- 양쪽 포켓으로 간단한 수납이 가능합니다.</li>
+               <li>- 비침이 없으며 배색 파이핑과 가슴판 포켓으로 포인트를 준 디자인입니다.</li>
+         </ul>
+
+         <img src="pajama.jpg">
+      </div>
+   </body>
+   </html>
+
+`CSS Selector <https://www.w3schools.com/cssref/css_selectors.asp>`_ 로 ``m2-product-area`` 영역을 지정한다. ::
+
+   window.M2OPTION = {
+      contentSelector: '#m2-product-area',
+      pinchzoom: {
+         enable: true
+      }
+   };
 
 
 
