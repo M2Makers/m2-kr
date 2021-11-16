@@ -7,6 +7,19 @@ Appendix A: 릴리스 노트
 v21.x
 ====================================
 
+.. _release-21-11-0:
+
+v21.11.0 (2021.11.16)
+----------------------------
+
+-   상품기술서 엔진
+
+    - :ref:`engine-prditem-postmain` 기능 추가
+    - :ref:`engine-prditem-mixed-contents-targettags` 기능 추가
+    - :ref:`engine-prditem-mixed-traffic-rebound` 도메인 위임기능 추가
+
+
+
 .. _release-21-10-0:
 
 v21.10.0 (2021.11.04)

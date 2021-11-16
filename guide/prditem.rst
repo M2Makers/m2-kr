@@ -363,7 +363,13 @@ Browser에서 상품기술서가 로딩 된 이후에 발생하는 리바운드 
    }
 
 
-리바운드 트래픽은 태그 레벨로 조절이 가능한 만큼 우선순위를 명확히 인지해야 한다.
+리바운드 트래픽은 아래 태그.속성에서만 동작한다. 
+
+-  ``<srcipt src="...">``
+-  ``<link href="...">``
+-  ``<iframe src="...">``
+
+따라서 이외의 태그.속성에 대해서는 동작하지 않는다. 동작방식은 다음과 같다.
 
 -  ``traffics.rebound.tags.targets`` 에 매칭되는 ``<태그.속성>`` 은 ``traffics.rebound.tags.domain`` 으로 URL이 변경된다. ::
 
@@ -1450,12 +1456,18 @@ M2의 프론트엔드 모듈인 ``m2fe.min.js`` 를 ``<HEAD>`` 영역에 삽입�
       "refControl" : {
          "enabe" : false,
          "mode" : "whitelist",
-         "domains" : [ ],
+         "domains" : [ "www.youtube.com", "youtu.be" ],
          "tags" : [
             {
                "name" : "iframe",
                "attr" : "src",
                "action" : "removeTag"
+            },
+            {
+               "name" : "embed",
+               "attr" : "src",
+               "action" : "removeAttr",
+               "domains" : [ "www.safe.com" ],
             }
          ]
       },
@@ -1489,6 +1501,8 @@ M2의 프론트엔드 모듈인 ``m2fe.min.js`` 를 ``<HEAD>`` 영역에 삽입�
          -  ``replaceAttr`` 속성명을 변경한다. 값은 그대로 유지된다.
 
          -  ``insertAttr`` 추가 속성을 삽입한다.
+
+      -  ``domains (기본: null)`` 이 태그.속성에 한정하여 적용할 도메인 목록
 
 
 다음과 같이 ``HTML`` 내 알 수 없는 리소스를 ``<iframe>`` 으로 참조하는 경우 이를 제어하는 방법에 대해 설명한다. ::
