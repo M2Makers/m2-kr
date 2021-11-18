@@ -1566,7 +1566,7 @@ M2의 프론트엔드 모듈인 ``m2fe.min.js`` 를 ``<HEAD>`` 영역에 삽입�
          "replaceAttr" : "alt"
       }
 
--  ``"action" : "appendAttr"`` 설정된 속성을 추가로 태그에 삽입한다. 아래와 같이 추가속성을 통해 해당 태그가 노출되지 않도록 수정ㅎㄴ다. ::
+-  ``"action" : "insertAttr"`` 설정된 속성을 추가로 태그에 삽입한다. 아래와 같이 추가속성을 통해 해당 태그가 노출되지 않도록 수정한다. ::
 
       <p>foo bar</p>
       <iframe width="560" height="315" src="https://foo.com/embed/xW95ui6xDNM" style="display:none;" alt="hidden by m2" title="Unknown video player" allowfullscreen></iframe>
