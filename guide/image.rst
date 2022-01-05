@@ -316,6 +316,8 @@ Font                                                                       Licen
 
 
 
+.. _engine-images-crop:
+
 잘라내기
 ====================================
 
@@ -329,6 +331,15 @@ Font                                                                       Licen
 이미지 중앙을 기준으로 하고 싶은 경우 cropcenter명령어를 사용한다. ::
 
    http://image.example.com/img.jpg/dims/cropcenter/100x200+20+30/
+
+
+이미지 크기를 미리 알기 어려운 경우 ``cropc`` 명령어를 이용하면 이미지 가운데를 기준으로 가로, 세로 기준 중 작거나 큰 값으로 잘라낼 수 있다. ::
+
+   // 가로, 세로 중 작은 값을 기준으로 cropcenter한다.
+   http://image.example.com/img.jpg/dims/cropc/min
+
+   // 가로, 세로 중 큰 값을 기준으로 cropcenter한다.
+   http://image.example.com/img.jpg/dims/cropc/max
 
 
 
