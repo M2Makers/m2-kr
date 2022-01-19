@@ -315,7 +315,6 @@ Font                                                                       Licen
    보안적인 이유로 Web Management를 통한 업로드는 지원하지 않는다.
 
 
-
 .. _engine-images-crop:
 
 잘라내기
@@ -340,7 +339,6 @@ Font                                                                       Licen
 
    // 가로, 세로 중 큰 값을 기준으로 cropcenter한다.
    http://image.example.com/img.jpg/dims/cropc/max
-
 
 
 Thumbnail 생성

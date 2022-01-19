@@ -121,37 +121,52 @@ Hooking 함수의 응답에 클라이언트 HTTP 요청을 재정의한다. ::
       "sessionId": 2,
       "response": {
          "code": 100,
-         "body": "blah blah"
+         "body": "blah blah",
+         "headers": [
+            { "key": "my-powered-by", "value": "winesoft" },
+            { "key": "cookie", "value": "NNB=LS3KUV63E5RV6; NRTK=ag#all_gr#1_ma#-2_si#0_en#0_sp#0;" }
+         ]
       },
       "cacheKey": "/availity?key={a,b,1}",
       "vhost": "bar.com",
       "originRequest": {
          "method": "POST",
          "url": "/itemimage/LO/12/37/50/02/80/vdo/LO1237500280_1.mpx3123",
+         "body": "<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\">\r\n  <s:Body>\r\n    <serviceCall xmlns=\"http://webservice.B2BOnline.com\">\r\n      <AvailRQ>\r\n        <AgencyId>JJSEL13157</AgencyId>\r\n        <CarrierCode>7C</CarrierCode>\r\n        <DepApoCode>CJU</DepApoCode>\r\n        <DepApoName></DepApoName>\r\n        <ArrApoCode>PUS</ArrApoCode>\r\n        <ArrApoName></ArrApoName>\r\n        <FlightDate>20171228</FlightDate>\r\n        <PaxCount>1</PaxCount>\r\n      </AvailRQ>\r\n    </serviceCall>\r\n  </s:Body>\r\n</s:Envelope>",
          "headers": [
             { "key": "host", "value": "baq.com" },
             { "key": "x-custom-header", "value": "abcdefg" },
             { "key": "x-custom-header2", "value": "baq.com" },
             { "key": "cookie", "value": "NNB=LS3KUV63E5RV6; NRTK=ag#all_gr#1_ma#-2_si#0_en#0_sp#0;" }
-         ],
-         "body": "<s:Envelope xmlns:s=\"http://schemas.xmlsoap.org/soap/envelope/\">\r\n  <s:Body>\r\n    <serviceCall xmlns=\"http://webservice.B2BOnline.com\">\r\n      <AvailRQ>\r\n        <AgencyId>JJSEL13157</AgencyId>\r\n        <CarrierCode>7C</CarrierCode>\r\n        <DepApoCode>CJU</DepApoCode>\r\n        <DepApoName></DepApoName>\r\n        <ArrApoCode>PUS</ArrApoCode>\r\n        <ArrApoName></ArrApoName>\r\n        <FlightDate>20171228</FlightDate>\r\n        <PaxCount>1</PaxCount>\r\n      </AvailRQ>\r\n    </serviceCall>\r\n  </s:Body>\r\n</s:Envelope>"
+         ]         
       }
    }
 
 
 -  ``sessionId`` 세션 고유번호 (디버그 용, USERDATA 개념)
 
--  ``resCode`` 응답코드
+-  ``response`` 클라이언트 요청 처리응답
 
-   -  ``100`` - Continue (흐름 지속)
+   -  ``code`` - 값이 ``100`` 인 경우 흐름을 지속한다. 그 외에는 트랜잭션을 더 진행하지 않고 정의된 ``code`` , ``body`` , ``headers`` 를 즉시 응답한다.
 
-   -  그 외에는 트랜잭션을 더 진행하지 않고 ``code`` 와 ``body`` 를 즉시 응답한다. 이는 디버깅에 용이하다.
+   -  ``body`` - 즉시 응답할 경우 HTTP Body 데이터.
+
+   -  ``headers`` - HTTP Headers. 바이패스를 제외한 모든 응답에 명시된다.
+
 
 -  ``cacheKey`` 캐싱엔진에서 사용할 키
 
 -  ``vhost`` 변경될 가상호스트. 이 값이 NULL 또는 빈문자열 이라면 가상호스트를 변경하지 않는다.
 
 -  ``originRequest`` 원본에 요청해야 하는 경우 HTTP 요청 구조체
+   
+   -  ``method`` - 원본요청 method
+
+   -  ``url`` - 원본요청 URL
+
+   -  ``body`` - 원본요청 HTTP Body 데이터.
+
+   -  ``headers`` - HTTP Headers
 
 
 .. note::
