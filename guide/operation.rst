@@ -208,6 +208,260 @@ M2가 진행하는 모든 HTTP 트랜잭션을 기록한다.
 
 
 
+.. _op-log-backup:
+
+실시간 로그백업
+=================================================
+
+M2는 실시간으로 적재되는 로그를 S3등 오브젝트 스토리지로 백업할 수 있다. ::
+
+   # /usr/local/m2/conf/config.json
+
+   {
+     "m2": {
+       "backup": {
+         "enable": false,
+         "repository": [
+           {
+             "name": "backup",
+             "type": "aws-s3",
+             "rolling": "0 0",
+             "path": "/edgelog/{domain}/{timestamp}/{hostname}_{logtype}.log",
+             "compression": {
+               "enable": false
+             },
+             "endpoint": {
+               "bucket": "s3-backup",
+               "region": "ap-northeast-2",
+               "accessKey": "AKKKUPB5555557S4RTTT",
+               "secretKey": "cqavykf6lPMc4KaJ6mETMQQQQQQLBmj4LWKiejq"
+             }
+           }
+         ],
+         "source": [
+           {
+             "path": "/ston_log/foo.com/access.log",
+             "backup": "backup"
+           }
+         ]
+       }
+     }
+   }
+
+
+-  ``enable (기본: false)`` 로그백업 활성화
+  
+   .. note:: 
+  
+      로그 백업 때문에 서비스 성능저하가 발생하면 안되어 스펙만 존재, 구현하지 않는다.
+     
+
+-  ``repository`` 로그 저장소 목록
+
+   - ``name`` 저장소 이름. 중복불가.
+   - ``type`` 저장소 타입. 현재는 ``aws-s3`` 만 지원한다.
+   - ``rolling`` 로그 업로드 시점
+
+     .. note::
+
+        개별 로그의 ``rolling`` 설정과 같은 표현을 사용하지만 동작방식이 다르다.
+
+          -  개별로그의 ``rolling`` 은 물리적인 로컬 로그파일이 교체되는 것에 대해 정의한다.
+          -  로그백업의 ``rolling`` 은 저장소에 저장될 로그파일 단위에 대해 정의한다.
+
+        예를 들어 로컬의 access.log는 day 단위로 운영되더라도 서버 사이드 백업은 5분 단위로 백업될 수 있다.
+        그 반대도 가능하다.
+
+     .. hint::
+
+        rt가 생성하는 물리적으로 분절된 파일의 연관성을 core에서 알 수 없어 이에 대한 지원이 필요하다.
+
+        - 1안> rt의 로그 순서 api 지원
+        - 2안> 로그 파일에 확장속성 ``xattr`` 을 이용해 OS상에서 linked list처럼 구현
+
+   - ``path`` 로그 업로드 경로정책. 경로 정책은 다음 3요소를 고려하여 구성되어야 한다.
+
+     -  ``멀티 노드`` 2대 이상의 불특정 멀티 노드에서 운영된다.
+     -  ``멀티 가상호스트`` 2개 이상의 가상호스트가 존재하며 언제든지 추가/삭제된다.
+     -  ``시간`` 로그는 시계열 데이터이다.
+    
+     로그 백업시 경로충돌에 대해 보장하지 않는다.
+
+     이상을 지원하기 위해 다음 변수를 제공한다.
+
+     ==================== ========================================================
+     ``{변수}``               상세
+     ==================== ========================================================
+     ``{domain}``          가상호스트 이름
+     ``{hostname}``        가상호스트를 서비스하는 M2의 호스트명
+     ``{ip}``              M2노드의 IP
+     ``{timestamp}``       ``yyyymmddhhmmss`` 형식의 시간
+     ``{logtype}``         로그타입. ``access`` 또는  ``origin`` 
+     ==================== ========================================================
+
+
+     ``{timestamp}`` 의 경우 하위 필드를 제공한다.
+
+     ====================== ========================================================
+     ``{timestamp}``          20220116173627
+     ====================== ========================================================
+     ``{timestamp.date}``      20220116
+     ``{timestamp.time}``      173627
+     ``{timestamp.year}``      2022
+     ``{timestamp.month}``     01
+     ``{timestamp.day}``       16
+     ``{timestamp.hour}``      17
+     ``{timestamp.minute}``    36
+     ``{timestamp.second}``    27  
+     ====================== ========================================================
+
+
+   - ``compression`` 로그 gzip 압축.
+
+   - ``endpoint`` 저장소 연결구성
+     - ``bucket`` 버킷
+     - ``region`` 리젼
+     - ``accessKey`` 액세스 키
+     - ``secretKey`` 시크릿 키
+
+- ``source`` 백업할 로컬로그 목록
+
+  - ``path`` 로컬로그 경로
+  - ``backup`` 백업할 ``repository.name``
+
+
+
+S3 + Athena 가이드
+---------------------------
+
+S3 + Athena를 이용하면 매우 효과적인 분석도구를 손쉽게 구축할 수 있다.
+단, Athena는 스캔한 데이터 용량기반 과금체계를 가지기에 적절한 파티셔닝 전략이 필요하다.
+
+
+::
+
+   # /usr/local/m2/conf/config.json
+
+   {
+     "m2": {
+       "backup": {
+         "enable": true,
+         "repository": [
+           {
+             ...
+             "path": "/mypath/year={timestamp.year}/month={timestamp.month}/day={timestamp.day}/hour={timestamp.hour}/min={timestamp.minute}/type={logtype}/domain={domain}/{hostname}_{ip}_{timestamp}.log"
+              "rolling": "*/5 *",
+              "compression": {
+                "enable": true
+              },
+              ...
+           }
+         ]
+       }
+     }
+   }
+
+
+-  ``path`` 파티셔닝 전략은 ``path`` 의 {key=value} 형식을 통해 로그분석 목적을 분명히 한다. ::
+
+      /...시간.../type=access/
+      지난 1주일 Peak시간 동안 클라이언트가 접근한 파일 중 10MB이상의 개수를 분석한다.
+
+      /...시간.../type=origin/domain=foo.com/
+      어제 오후 4시부터 15동안 foo.com 원본에서 발생한 500 에러 응답을 분석한다. 
+
+
+-  ``rolling`` 최소 단위로 5분을 권장한다.
+
+-  ``compression.enble`` 압축을 통해 90% 이상 비용을 절감할 수 있다.
+
+
+
+``athena`` access.log 테이블 스키마
+------------------------------------
+
+::
+
+   CREATE EXTERNAL TABLE IF NOT EXISTS access_logs (
+      `date` STRING,
+      `time` STRING,
+      `s-ip` STRING,
+      `cs-method` STRING,
+      `cs-uri-stem` STRING,
+      `cs-uri-query` STRING,
+      `s-port` STRING,
+      `cs-username` STRING,
+      `c-ip` STRING,
+      `cs-useragent` STRING,
+      `sc-status` STRING,
+      `sc-bytes` STRING,
+      `time-taken` STRING,
+      `cs-referer` STRING,
+      `sc-resinfo` STRING,
+      `cs-range` STRING,
+      `sc-cachehit` STRING,
+      `cs-acceptencoding` STRING,
+      `session-id` STRING,
+      `sc-content-length` STRING,
+      `time-response` STRING,
+      `x-transaction-status` STRING,
+      `x-vhostlink` STRING 
+   ) PARTITIONED BY (`year` int, `month` int, `day` int)
+   ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.RegexSerDe'
+   WITH SERDEPROPERTIES (
+      "input.regex" = "^(?!#)([^ ]+)\\s+([^ ]+)\\s+([^ ]+)\\s+([^ ]+)\\s+([^ ]+)\\s+([^ ]+)\\s+([^ ]+)\\s+([^ ]+)\\s+([^ ]+)\\s+([^ ]+)\\s+([^ ]+)\\s+([^ ]+)\\s+([^ ]+)\\s+([^ ]+)\\s+([^ ]+)\\s+([^ ]+)\\s+([^ ]+)\\s+([^ ]+)\\s+([^ ]+)\\s+([^ ]+)\\s+([^ ]+)\\s+([^ ]+)\\s+([^ ]+)"
+   ) LOCATION "s3://winesoft-logs/access"
+   TBLPROPERTIES ("has_encrypted_data"="false");
+
+
+``athena`` origin.log 테이블 스키마
+------------------------------------
+
+::
+
+   CREATE EXTERNAL TABLE IF NOT EXISTS origin_logs (
+      `date` STRING,
+      `time` STRING,
+      `cs-sid` STRING,
+      `cs-tcount` STRING,
+      `c-ip` STRING,
+      `cs-method` STRING,
+      `s-domain` STRING,
+      `cs-uri` STRING,
+      `s-ip` STRING,
+      `sc-status` STRING,
+      `cs-range` STRING,
+      `sc-sock-error` STRING,
+      `sc-http-error` STRING,
+      `sc-content-length` STRING,
+      `cs-requestsize` STRING,
+      `sc-responsesize` STRING,
+      `sc-bytes` STRING,
+      `time-taken` STRING,
+      `time-dns` STRING,
+      `time-connect` STRING,
+      `time-firstbyte` STRING,
+      `time-complete` STRING,
+      `cs-reqinfo` STRING,
+      `cs-acceptencoding` STRING,
+      `sc-cachecontrol` STRING,
+      `s-port` STRING,
+      `sc-contentencoding` STRING,
+      `session-id` STRING,
+      `session-type` STRING,
+      `x-sc-extra-field` STRING,
+      `time-sock-creation` STRING,
+      `x-cs-retry` STRING
+   ) PARTITIONED BY (`year` int, `month` int, `day` int)
+   ROW FORMAT SERDE 'org.apache.hadoop.hive.serde2.RegexSerDe'
+   WITH SERDEPROPERTIES (
+      "input.regex" = "^(?!#)([^ ]+)\\s+([^ ]+)\\s+([^ ]+)\\s+([^ ]+)\\s+([^ ]+)\\s+([^ ]+)\\s+([^ ]+)\\s+([^ ]+)\\s+([^ ]+)\\s+([^ ]+)\\s+([^ ]+)\\s+([^ ]+)\\s+([^ ]+)\\s+([^ ]+)\\s+([^ ]+)\\s+([^ ]+)\\s+([^ ]+)\\s+([^ ]+)\\s+([^ ]+)\\s+([^ ]+)\\s+([^ ]+)\\s+([^ ]+)\\s+([^ ]+)\\s+([^ ]+)\\s+([^ ]+)\\s+([^ ]+)\\s+([^ ]+)\\s+([^ ]+)\\s+([^ ]+)\\s+([^ ]+)\\s+([^ ]+)\\s+([^ ]+)"
+   ) 
+   LOCATION "s3://winesoft-logs/origin"
+   TBLPROPERTIES ("has_encrypted_data"="false");
+
+
+
 .. _op-monitoring:
 
 통계
